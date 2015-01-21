@@ -47,8 +47,7 @@ func main() {
       fmt.Println()
       for _, todo := range collection.Todos {
         todo.MakeOutput()
-      }     
-           
+      }
       fmt.Println()
     }
   }
