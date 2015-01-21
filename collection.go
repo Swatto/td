@@ -60,7 +60,6 @@ func (c *Collection) ListDoneTodos() () {
 
 func (c *Collection) CreateTodo(newTodo *Todo) (error) {
   var highestId int64 = 0
-  println(len(c.Todos))
   for _, todo := range c.Todos {
     if todo.Id > highestId {
       highestId = todo.Id
