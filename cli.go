@@ -63,7 +63,7 @@ func main() {
           fmt.Println()
           color.Red("Error")
           fmt.Println("You must provide a name to your todo.")
-          fmt.Println("Example: todo create \"call mum\"")
+          fmt.Println("Example: td create \"call mum\"")
           fmt.Println()
           return
         }
