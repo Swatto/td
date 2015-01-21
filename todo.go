@@ -18,10 +18,10 @@ func (t *Todo) MakeOutput() {
 
   if(t.Status == "done"){
     colorFunction = color.New(color.FgGreen).SprintFunc()
-    symbole = "✔︎"
+    symbole = "✓"
   } else {
     colorFunction = color.New(color.FgRed).SprintFunc()
-    symbole = "✖"
+    symbole = "✕"
   }
 
   fmt.Println(t.Id, colorFunction(symbole), t.Desc)
