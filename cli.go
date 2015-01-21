@@ -5,7 +5,6 @@ import (
   "os"
   "time"
   "strconv"
-  "errors"
   "github.com/codegangsta/cli"
   "github.com/fatih/color"
 )
