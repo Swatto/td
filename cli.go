@@ -94,6 +94,8 @@ func main() {
       ShortName: "t",
       Usage: "Toggle the status of a todo by giving his id",
       Action: func(c *cli.Context) {
+        var err error
+
         collection := Collection{}
         collection.RetrieveTodos()
 
@@ -103,12 +105,13 @@ func main() {
           return
         }
 
-        todo, err_update := collection.Toggle(id)
-        if err_update != nil {
+        todo, err := collection.Toggle(id)
+        if err != nil {
           fmt.Println(err)
           return
         }
-        todo.MakeOutput()
+
+        color.Cyan("Your todo is now %s.", todo.Status)
       },
     },
     {
