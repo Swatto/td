@@ -51,7 +51,6 @@ func main() {
       fmt.Println()
     }
   }
-
   app.Commands = []cli.Command{
     {
       Name: "create",
@@ -182,11 +181,9 @@ func main() {
 
   app.Before = func(c *cli.Context) error {
     var err error
-
     path := os.Getenv("TODO_DB_PATH")
+
     if path == "" {
-      err = errors.New("The environment variable \"TODO_DB_PATH\" need to be set.")
-      err = errors.New("")
       fmt.Println()
       color.Red("Error")
       fmt.Println("The environment variable \"TODO_DB_PATH\" need to be set.")
