@@ -131,6 +131,23 @@ func main() {
         }
       },
     },
+    {
+      Name: "reorder",
+      Usage: "Reset ids of todo",
+      Action: func(c *cli.Context) {
+        collection := Collection{}
+        collection.RetrieveTodos()
+
+        err := collection.Reorder()
+
+        if err != nil {
+          fmt.Println(err)
+          return
+        }
+
+        color.Cyan("Your list is now reordered.")
+      },
+    },
   }
 
   app.Before = func(c *cli.Context) error {

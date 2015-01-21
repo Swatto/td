@@ -115,3 +115,11 @@ func (c * Collection) RemoveFinishedTodos() (error) {
   err := c.WriteTodos()
   return err
 }
+
+func (c *Collection) Reorder() (error) {
+  for i, todo := range c.Todos {
+    todo.Id = int64(i+1)
+  }
+  err := c.WriteTodos()
+  return err
+}
