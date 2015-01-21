@@ -148,6 +148,36 @@ func main() {
         color.Cyan("Your list is now reordered.")
       },
     },
+    {
+      Name: "search",
+      ShortName: "s",
+      Usage: "Search a string in all todos",
+      Action: func(c *cli.Context) {
+        if len(c.Args()) != 1 {
+          fmt.Println()
+          color.Red("Error")
+          fmt.Println("You must provide a string earch.")
+          fmt.Println("Example: td search \"project-1\"")
+          fmt.Println()
+          return
+        }
+
+        collection := Collection{}
+        collection.RetrieveTodos()
+        collection.Search(c.Args()[0])
+
+        if len(collection.Todos) == 0 {
+          color.Cyan("Sorry, there's no todos containing \"%s\".", c.Args()[0])
+          return
+        }
+
+        fmt.Println()
+        for _, todo := range collection.Todos {
+          todo.MakeOutput()
+        }
+        fmt.Println()
+      },
+    },
   }
 
   app.Before = func(c *cli.Context) error {

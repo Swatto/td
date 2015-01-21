@@ -6,6 +6,7 @@ import (
   "time"
   "errors"
   "strconv"
+  "strings"
 )
 
 type Collection struct {
@@ -122,4 +123,12 @@ func (c *Collection) Reorder() (error) {
   }
   err := c.WriteTodos()
   return err
+}
+
+func (c *Collection) Search(sentence string) {
+  for i := len(c.Todos)-1; i >=0; i-- {
+    if !strings.Contains(c.Todos[i].Desc, sentence) {
+      c.RemoveAtIndex(i)
+    }
+  }
 }
