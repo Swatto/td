@@ -132,6 +132,7 @@ func main() {
     },
     {
       Name: "reorder",
+      ShortName: "r",
       Usage: "Reset ids of todo",
       Action: func(c *cli.Context) {
         collection := Collection{}
