@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/Swatto/td",
+	"GoVersion": "go1.4.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.2.0-62-gbf4a526",
+			"Rev": "bf4a526f48af7badd25d2cb02d587e1b01be3b50"
+		},
+		{
+			"ImportPath": "github.com/fatih/color",
+			"Rev": "f19a133fbf02ea4974db468b07328745a8840da7"
+		}
+	]
+}
