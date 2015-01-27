@@ -1,8 +1,9 @@
 package main
 
 import (
-  "github.com/fatih/color"
   "fmt"
+  "regexp"
+  "github.com/fatih/color"
 )
 
 type Todo struct {
@@ -24,5 +25,12 @@ func (t *Todo) MakeOutput() {
     symbole = "✕"
   }
 
-  fmt.Println(t.Id, colorFunction(symbole), t.Desc)
+  hashtag_reg := regexp.MustCompile("#[^\\s]*")
+
+  if hashtag_reg.MatchString(t.Desc) {
+    hashtag_output := color.New(color.FgYellow).SprintFunc()
+    t.Desc = hashtag_reg.ReplaceAllString(t.Desc, hashtag_output(hashtag_reg.FindString(t.Desc)))
+  }
+
+  fmt.Println("\t", t.Id, "|", colorFunction(symbole), t.Desc)
 }
