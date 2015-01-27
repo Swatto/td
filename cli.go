@@ -185,7 +185,7 @@ func main() {
     if path == "" {
       fmt.Println()
       color.Red("Error")
-      fmt.Println("The environment variable \"TODO_DB_PATH\" need to be set.")
+      fmt.Println("The environment variable \"TODO_DB_PATH\" must be set.")
       fmt.Println("Example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bash_profile")
       fmt.Println()
     }
