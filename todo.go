@@ -4,6 +4,8 @@ import (
   "fmt"
   "regexp"
   "github.com/fatih/color"
+  "strconv"
+  "strings"
 )
 
 type Todo struct {
@@ -32,5 +34,7 @@ func (t *Todo) MakeOutput() {
     t.Desc = hashtag_reg.ReplaceAllString(t.Desc, hashtag_output(hashtag_reg.FindString(t.Desc)))
   }
 
-  fmt.Println("\t", t.Id, "|", colorFunction(symbole), t.Desc)
+  space_count := 6 - len(strconv.FormatInt(t.Id, 10))
+
+  fmt.Println(strings.Repeat(" ", space_count), t.Id, "|", colorFunction(symbole), t.Desc)
 }
