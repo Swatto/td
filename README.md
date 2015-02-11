@@ -2,7 +2,48 @@
 
 > Your todo list in your terminal.
 
-*More to come*
+## Usage
+
+### Installation
+
+- From *binary*: go to the [release page](https://github.com/Swatto/td/releases)
+- From *source*: `go get github.com/Swatto/td`
+
+### Information
+
+*td* use a environment variable to store your todos `TODO_DB_PATH` where you
+define the path to the futur JSON file. If the file doesn't exist, the program
+will create it for you.
+
+### CLI
+
+```
+NAME:
+   td - Your todos manager
+
+USAGE:
+   td [global options] command [command options] [arguments...]
+
+VERSION:
+   1.0.0
+
+AUTHOR:
+  Gaël Gillard
+
+COMMANDS:
+   create, add  Create a new todo
+   toggle, t    Toggle the status of a todo by giving his id
+   clean        Remove finished todos from the list
+   reorder, r   Reset ids of todo
+   search, s    Search a string in all todos
+   help, h      Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --done, -d           print done todos
+   --all, -a            print all todos
+   --help, -h           show help
+   --version, -v        print the version
+```
 
 ## License
 
