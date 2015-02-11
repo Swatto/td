@@ -13,7 +13,22 @@ type Collection struct {
   Todos []*Todo
 }
 
-func (c *Collection) RemoveAtIndex(item  int) {
+func CreateStoreFileIfNeeded(path string) (error) {
+  _, err := os.Stat(path)
+  if err != nil {
+    if os.IsNotExist(err) {
+      w, err := os.Create(path)
+      _, err = w.WriteString("[]")
+      defer w.Close()
+      return err
+    } else {
+      return err
+    }
+  }
+  return nil
+}
+
+func (c *Collection) RemoveAtIndex(item int) {
   s := *c
   s.Todos = append(s.Todos[:item], s.Todos[item+1:]...)
   *c = s

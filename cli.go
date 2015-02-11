@@ -13,9 +13,9 @@ func main() {
   app := cli.NewApp()
   app.Name = "td"
   app.Usage = "Your todos manager"
-  app.Version = "0.1.0"
+  app.Version = "1.0.0"
   app.Author = "Gaël Gillard"
-  app.Email = "not_here@gmy_privacy.com"
+  app.Email = ""
   app.Flags = []cli.Flag {
     cli.BoolFlag{
       Name: "done, d",
@@ -197,6 +197,8 @@ func main() {
       fmt.Println("Example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bash_profile")
       fmt.Println()
     }
+
+    CreateStoreFileIfNeeded(path)
 
     return err
   }
