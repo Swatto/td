@@ -1,6 +1,7 @@
 # td
 
 > Your todo list in your terminal.
+> ![Screenshot](screenshot.png)
 
 ## Usage
 
