@@ -43,11 +43,15 @@ func main() {
         }
       }
 
-      fmt.Println()
-      for _, todo := range collection.Todos {
-        todo.MakeOutput()
+      if(len(collection.Todos) > 0) {
+        fmt.Println()
+        for _, todo := range collection.Todos {
+          todo.MakeOutput()
+        }
+        fmt.Println()
+      } else {
+        color.Cyan("There's no todo to show.")
       }
-      fmt.Println()
     }
   }
   app.Commands = []cli.Command{
@@ -169,11 +173,15 @@ func main() {
           return
         }
 
-        fmt.Println()
-        for _, todo := range collection.Todos {
-          todo.MakeOutput()
+        if(len(collection.Todos) > 0) {
+          fmt.Println()
+          for _, todo := range collection.Todos {
+            todo.MakeOutput()
+          }
+          fmt.Println()
+        } else {
+          color.Cyan("There's no todo to show.")
         }
-        fmt.Println()
       },
     },
   }
