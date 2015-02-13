@@ -14,17 +14,18 @@ type Collection struct {
 }
 
 func CreateStoreFileIfNeeded(path string) error {
-	_, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			w, err := os.Create(path)
-			_, err = w.WriteString("[]")
-			defer w.Close()
-			return err
-		} else {
-			return err
-		}
+	fi, err := os.Stat(path)
+	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
+		w, err := os.Create(path)
+		_, err = w.WriteString("[]")
+		defer w.Close()
+		return err
 	}
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -35,7 +36,7 @@ func (c *Collection) RemoveAtIndex(item int) {
 }
 
 func (c *Collection) RetrieveTodos() error {
-	file, err := os.OpenFile(os.Getenv("TODO_DB_PATH"), os.O_RDONLY, 0600)
+	file, err := os.OpenFile(GetDBPath(), os.O_RDONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func (c *Collection) RetrieveTodos() error {
 }
 
 func (c *Collection) WriteTodos() error {
-	file, err := os.OpenFile(os.Getenv("TODO_DB_PATH"), os.O_RDWR|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(GetDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
