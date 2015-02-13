@@ -57,8 +57,8 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:      "create",
-			ShortName: "add",
+			Name:      "add",
+			ShortName: "a",
 			Usage:     "Create a new todo",
 			Action: func(c *cli.Context) {
 
