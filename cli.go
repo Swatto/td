@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/codegangsta/cli"
 	"github.com/fatih/color"
@@ -76,7 +75,7 @@ func main() {
 					Id:       0,
 					Desc:     c.Args()[0],
 					Status:   "pending",
-					Modified: (time.Now().Local()).Format(time.Stamp),
+					Modified: "",
 				}
 				err := collection.RetrieveTodos()
 				if err != nil {
