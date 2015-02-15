@@ -101,26 +101,26 @@ func main() {
       ShortName: "t",
       Usage: "Toggle the status of a todo by giving his id",
       Action: func(c *cli.Context) {
-        var err error
-
         collection := Collection{}
         collection.RetrieveTodos()
 
-        id, err := strconv.ParseInt(c.Args()[0], 10, 32)
-        if err != nil {
-          fmt.Println(err)
-          return
-        }
+        for _, arg := range c.Args() {
+          id, err := strconv.ParseInt(arg, 10, 32)
+          if err != nil {
+            fmt.Println(err)
+            return
+          }
 
-        todo, err := collection.Toggle(id)
-        if err != nil {
-          fmt.Println(err)
-          return
-        }
+          todo, err := collection.Toggle(id)
+          if err != nil {
+            fmt.Println(err)
+            return
+          }
 
-        ct.ChangeColor(ct.Cyan, false, ct.None, false)
-        fmt.Printf("Your todo is now %s.\n", todo.Status)
-        ct.ResetColor()
+          ct.ChangeColor(ct.Cyan, false, ct.None, false)
+          fmt.Printf("Your todo #%d is now %s.\n", id, todo.Status)
+          ct.ResetColor()
+        }
       },
     },
     {
