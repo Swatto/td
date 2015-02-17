@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -141,8 +141,10 @@ func (c *Collection) Reorder() error {
 }
 
 func (c *Collection) Search(sentence string) {
+	sentence = regexp.QuoteMeta(sentence)
+	re := regexp.MustCompile("(?i)" + sentence)
 	for i := len(c.Todos) - 1; i >= 0; i-- {
-		if !strings.Contains(c.Todos[i].Desc, sentence) {
+		if !re.MatchString(c.Todos[i].Desc) {
 			c.RemoveAtIndex(i)
 		}
 	}
