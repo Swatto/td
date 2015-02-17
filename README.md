@@ -16,6 +16,8 @@
 define the path to the futur JSON file. If the file doesn't exist, the program
 will create it for you.
 
+But if your current directory has a `.todos` file, it will overwrite the environment variable.
+
 ### CLI
 
 ```
@@ -26,13 +28,14 @@ USAGE:
    td [global options] command [command options] [arguments...]
 
 VERSION:
-   1.0.0
+   1.1.0
 
 AUTHOR:
   Gaël Gillard
 
 COMMANDS:
-   create, add  Create a new todo
+   add, a       Add a new todo
+   modify, m    Modify the text of an existing todo
    toggle, t    Toggle the status of a todo by giving his id
    clean        Remove finished todos from the list
    reorder, r   Reset ids of todo
