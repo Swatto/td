@@ -32,11 +32,12 @@ func (t *Todo) MakeOutput() {
 
 	space_count := 6 - len(strconv.FormatInt(t.Id, 10))
 
-	fmt.Print(strings.Repeat(" ", space_count), t.Id, "|")
+	fmt.Print(strings.Repeat(" ", space_count), t.Id, " | ")
 	ct.ChangeColor(color, false, ct.None, false)
 	fmt.Print(symbole)
 	ct.ResetColor()
 	pos := 0
+	fmt.Print(" ")
 	for _, token := range hashtag_reg.FindAllStringIndex(t.Desc, -1) {
 		fmt.Print(t.Desc[pos:token[0]])
 		ct.ChangeColor(ct.Yellow, false, ct.None, false)
