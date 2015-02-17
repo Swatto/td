@@ -32,7 +32,7 @@ func (t *Todo) MakeOutput() {
 
 	space_count := 6 - len(strconv.FormatInt(t.Id, 10))
 
-	fmt.Print(strings.Repeat(" ", space_count), t.Id, "|")
+	fmt.Print(strings.Repeat(" ", space_count), t.Id, " | ")
 	ct.ChangeColor(color, false, ct.None, false)
 	fmt.Print(symbole)
 	ct.ResetColor()
