@@ -91,6 +91,39 @@ func main() {
 			},
 		},
 		{
+			Name:      "modify",
+			ShortName: "m",
+			Usage:     "Modify the text of an existing todo",
+			Action: func(c *cli.Context) {
+
+				if len(c.Args()) != 2 {
+					fmt.Println()
+					color.Red("Error")
+					fmt.Println("You must provide the id and the new text for your todo.")
+					fmt.Println("Example: td modify 2 \"call dad\"")
+					fmt.Println()
+					return
+				}
+
+				collection := Collection{}
+				collection.RetrieveTodos()
+
+				id, err := strconv.ParseInt(c.Args()[0], 10, 32)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				_, err = collection.Modify(id, c.Args()[1])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				color.Cyan("\"%s\" has now a new description: %s", c.Args()[0], c.Args()[1])
+			},
+		},
+		{
 			Name:      "toggle",
 			ShortName: "t",
 			Usage:     "Toggle the status of a todo by giving his id",

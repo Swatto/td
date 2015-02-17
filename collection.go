@@ -128,6 +128,25 @@ func (c *Collection) Toggle(id int64) (*Todo, error) {
 	return todo, err
 }
 
+func (c *Collection) Modify(id int64, desc string) (*Todo, error) {
+	todo, err := c.Find(id)
+
+	if err != nil {
+		return todo, err
+	}
+
+	todo.Desc = desc
+	todo.Modified = time.Now().Local().String()
+
+	err = c.WriteTodos()
+	if err != nil {
+		err = errors.New("Todos couldn't be saved")
+		return todo, err
+	}
+
+	return todo, err
+}
+
 func (c *Collection) RemoveFinishedTodos() error {
 	c.ListPendingTodos()
 	err := c.WriteTodos()
