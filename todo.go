@@ -32,7 +32,12 @@ func (t *Todo) MakeOutput() {
 
 	if hashtag_reg.MatchString(t.Desc) {
 		hashtag_output := color.New(color.FgYellow).SprintFunc()
-		t.Desc = hashtag_reg.ReplaceAllString(t.Desc, hashtag_output(hashtag_reg.FindString(t.Desc)))
+
+		colorify_hashtag := func(s string) string {
+			return hashtag_output(s)
+		}
+
+		t.Desc = hashtag_reg.ReplaceAllStringFunc(t.Desc, colorify_hashtag)
 	}
 
 	space_count := 6 - len(strconv.FormatInt(t.Id, 10))
