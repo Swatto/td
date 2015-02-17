@@ -197,7 +197,7 @@ func main() {
 
 	app.Before = func(c *cli.Context) error {
 		var err error
-		path := os.Getenv("TODO_DB_PATH")
+		path := GetDBPath()
 
 		if path == "" {
 			fmt.Println()
