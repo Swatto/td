@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/codegangsta/cli"
-	"github.com/fatih/color"
+	"github.com/daviddengcn/go-colortext"
 )
 
 func main() {
@@ -50,7 +50,9 @@ func main() {
 				}
 				fmt.Println()
 			} else {
-				color.Cyan("There's no todo to show.")
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				fmt.Println("There's no todo to show.")
+				ct.ResetColor()
 			}
 		}
 	}
@@ -63,7 +65,9 @@ func main() {
 
 				if len(c.Args()) != 1 {
 					fmt.Println()
-					color.Red("Error")
+					ct.ChangeColor(ct.Red, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
 					fmt.Println("You must provide a name to your todo.")
 					fmt.Println("Example: td add \"call mum\"")
 					fmt.Println()
@@ -87,7 +91,9 @@ func main() {
 					fmt.Println(err)
 				}
 
-				color.Cyan("\"%s\" is now added to your todos.", c.Args()[0])
+				ct.ChangeColor(ct.Red, false, ct.None, false)
+				fmt.Printf("\"%s\" is now added to your todos.\n", c.Args()[0])
+				ct.ResetColor()
 			},
 		},
 		{
@@ -136,7 +142,9 @@ func main() {
 
 				if len(c.Args()) != 1 {
 					fmt.Println()
-					color.Red("Error")
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
 					fmt.Println("You must the id of the item you want to change todo.")
 					fmt.Println("Example: td toggle 1")
 					fmt.Println()
@@ -158,7 +166,9 @@ func main() {
 					return
 				}
 
-				color.Cyan("Your todo is now %s.", todo.Status)
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				fmt.Printf("Your todo is now %s.\n", todo.Status)
+				ct.ResetColor()
 			},
 		},
 		{
@@ -174,7 +184,9 @@ func main() {
 					fmt.Println(err)
 					return
 				} else {
-					color.Cyan("Your list is now flushed of finished todos.")
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Println("Your list is now flushed of finished todos.")
+					ct.ResetColor()
 				}
 			},
 		},
@@ -193,7 +205,9 @@ func main() {
 					return
 				}
 
-				color.Cyan("Your list is now reordered.")
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				fmt.Println("Your list is now reordered.")
+				ct.ResetColor()
 			},
 		},
 		{
@@ -203,7 +217,9 @@ func main() {
 			Action: func(c *cli.Context) {
 				if len(c.Args()) != 1 {
 					fmt.Println()
-					color.Red("Error")
+					ct.ChangeColor(ct.Red, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
 					fmt.Println("You must provide a string earch.")
 					fmt.Println("Example: td search \"project-1\"")
 					fmt.Println()
@@ -215,7 +231,9 @@ func main() {
 				collection.Search(c.Args()[0])
 
 				if len(collection.Todos) == 0 {
-					color.Cyan("Sorry, there's no todos containing \"%s\".", c.Args()[0])
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Printf("Sorry, there's no todos containing \"%s\".\n", c.Args()[0])
+					ct.ResetColor()
 					return
 				}
 
@@ -226,7 +244,9 @@ func main() {
 					}
 					fmt.Println()
 				} else {
-					color.Cyan("There's no todo to show.")
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Println("There's no todo to show.")
+					ct.ResetColor()
 				}
 			},
 		},
@@ -238,7 +258,9 @@ func main() {
 
 		if path == "" {
 			fmt.Println()
-			color.Red("Error")
+			ct.ChangeColor(ct.Red, false, ct.None, false)
+			fmt.Println("Error")
+			ct.ResetColor()
 			fmt.Println("The environment variable \"TODO_DB_PATH\" must be set.")
 			fmt.Println("Example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bash_profile")
 			fmt.Println()
