@@ -98,7 +98,9 @@ func main() {
 
 				if len(c.Args()) != 2 {
 					fmt.Println()
-					color.Red("Error")
+					ct.ChangeColor(ct.Red, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
 					fmt.Println("You must provide the id and the new text for your todo.")
 					fmt.Println("Example: td modify 2 \"call dad\"")
 					fmt.Println()
@@ -120,7 +122,9 @@ func main() {
 					return
 				}
 
-				color.Cyan("\"%s\" has now a new description: %s", c.Args()[0], c.Args()[1])
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				fmt.Printf("\"%s\" has now a new description: %s", c.Args()[0], c.Args()[1])
+				ct.ResetColor()
 			},
 		},
 		{
