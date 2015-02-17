@@ -28,7 +28,7 @@ USAGE:
    td [global options] command [command options] [arguments...]
 
 VERSION:
-   1.1.0
+   1.1.1
 
 AUTHOR:
   Gaël Gillard
