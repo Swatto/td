@@ -98,6 +98,15 @@ func main() {
 			Action: func(c *cli.Context) {
 				var err error
 
+				if len(c.Args()) != 1 {
+					fmt.Println()
+					color.Red("Error")
+					fmt.Println("You must the id of the item you want to change todo.")
+					fmt.Println("Example: td toggle 1")
+					fmt.Println()
+					return
+				}
+
 				collection := Collection{}
 				collection.RetrieveTodos()
 
