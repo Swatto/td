@@ -36,6 +36,7 @@ func (t *Todo) MakeOutput() {
 	ct.ChangeColor(color, false, ct.None, false)
 	fmt.Print(symbole)
 	ct.ResetColor()
+	fmt.Print(" ")
 	pos := 0
 	for _, token := range hashtag_reg.FindAllStringIndex(t.Desc, -1) {
 		fmt.Print(t.Desc[pos:token[0]])
