@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/daviddengcn/go-colortext"
 )
 
 type Todo struct {
@@ -18,29 +18,31 @@ type Todo struct {
 
 func (t *Todo) MakeOutput() {
 	var symbole string
-	var colorFunction func(...interface{}) string
+	var color ct.Color
 
 	if t.Status == "done" {
-		colorFunction = color.New(color.FgGreen).SprintFunc()
+		color = ct.Green
 		symbole = "✓"
 	} else {
-		colorFunction = color.New(color.FgRed).SprintFunc()
+		color = ct.Red
 		symbole = "✕"
 	}
 
 	hashtag_reg := regexp.MustCompile("#[^\\s]*")
 
-	if hashtag_reg.MatchString(t.Desc) {
-		hashtag_output := color.New(color.FgYellow).SprintFunc()
-
-		colorify_hashtag := func(s string) string {
-			return hashtag_output(s)
-		}
-
-		t.Desc = hashtag_reg.ReplaceAllStringFunc(t.Desc, colorify_hashtag)
-	}
-
 	space_count := 6 - len(strconv.FormatInt(t.Id, 10))
 
-	fmt.Println(strings.Repeat(" ", space_count), t.Id, "|", colorFunction(symbole), t.Desc)
+	fmt.Print(strings.Repeat(" ", space_count), t.Id, "|")
+	ct.ChangeColor(color, false, ct.None, false)
+	fmt.Print(symbole)
+	ct.ResetColor()
+	pos := 0
+	for _, token := range hashtag_reg.FindAllStringIndex(t.Desc, -1) {
+		fmt.Print(t.Desc[pos:token[0]])
+		ct.ChangeColor(ct.Yellow, false, ct.None, false)
+		fmt.Print(t.Desc[token[0]:token[1]])
+		ct.ResetColor()
+		pos = token[1]
+	}
+	fmt.Println(t.Desc[pos:])
 }
