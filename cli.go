@@ -57,16 +57,16 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:      "create",
-			ShortName: "add",
-			Usage:     "Create a new todo",
+			Name:      "add",
+			ShortName: "a",
+			Usage:     "Add a new todo",
 			Action: func(c *cli.Context) {
 
 				if len(c.Args()) != 1 {
 					fmt.Println()
 					color.Red("Error")
 					fmt.Println("You must provide a name to your todo.")
-					fmt.Println("Example: td create \"call mum\"")
+					fmt.Println("Example: td add \"call mum\"")
 					fmt.Println()
 					return
 				}
