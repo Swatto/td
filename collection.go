@@ -83,6 +83,7 @@ func (c *Collection) CreateTodo(newTodo *Todo) error {
 	}
 
 	newTodo.Id = (highestId + 1)
+	newTodo.Modified = time.Now().Local().String()
 	c.Todos = append(c.Todos, newTodo)
 
 	err := c.WriteTodos()
