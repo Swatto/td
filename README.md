@@ -1,6 +1,9 @@
 # td
 
+![https://gratipay.com/Swatto/](http://img.shields.io/gratipay/Swatto.svg)
+
 > Your todo list in your terminal.
+>
 > ![Screenshot](screenshot.png)
 
 ## Usage
