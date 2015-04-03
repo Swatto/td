@@ -86,13 +86,13 @@ func main() {
 					fmt.Println(err)
 				}
 
-				err = collection.CreateTodo(&todo)
+				id, err := collection.CreateTodo(&todo)
 				if err != nil {
 					fmt.Println(err)
 				}
 
 				ct.ChangeColor(ct.Red, false, ct.None, false)
-				fmt.Printf("\"%s\" is now added to your todos.\n", c.Args()[0])
+				fmt.Printf("#%d \"%s\" is now added to your todos.\n", id, c.Args()[0])
 				ct.ResetColor()
 			},
 		},
