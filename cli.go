@@ -91,7 +91,7 @@ func main() {
 					fmt.Println(err)
 				}
 
-				ct.ChangeColor(ct.Red, false, ct.None, false)
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
 				fmt.Printf("\"%s\" is now added to your todos.\n", c.Args()[0])
 				ct.ResetColor()
 			},
