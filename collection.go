@@ -75,7 +75,7 @@ func (c *Collection) ListDoneTodos() {
 	}
 }
 
-func (c *Collection) CreateTodo(newTodo *Todo) error {
+func (c *Collection) CreateTodo(newTodo *Todo) (int64, error) {
 	var highestId int64 = 0
 	for _, todo := range c.Todos {
 		if todo.Id > highestId {
@@ -88,7 +88,7 @@ func (c *Collection) CreateTodo(newTodo *Todo) error {
 	c.Todos = append(c.Todos, newTodo)
 
 	err := c.WriteTodos()
-	return err
+	return newTodo.Id, err
 }
 
 func (c *Collection) Find(id int64) (foundedTodo *Todo, err error) {
