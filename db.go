@@ -7,6 +7,7 @@ import (
 )
 
 var IsNotAFileErr = errors.New("The database path is not a file")
+var LocalDbFileNotFoundErr = errors.New("The local .todos file was not found")
 
 var cachedDBPath = ""
 
@@ -25,20 +26,15 @@ func GetDBPath() string {
 }
 
 func getDBPath() (string, error) {
-	dbPath, err := tryCwd()
+	dbPath, err := tryCwdAndParentFolders()
 	if err != nil {
 		dbPath, err = tryEnv()
 	}
 	return dbPath, err
 }
 
-func tryCwd() (string, error) {
-	cw, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	dbPath := path.Join(cw, ".todos")
+func tryDir(dir string) (string, error) {
+	dbPath := path.Join(dir, ".todos")
 	fi, err := os.Stat(dbPath)
 	if err != nil {
 		return "", err
@@ -49,6 +45,28 @@ func tryCwd() (string, error) {
 	}
 
 	return dbPath, nil
+}
+
+func tryCwdAndParentFolders() (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		filePath, err := tryDir(cwd)
+		if err == nil {
+			return filePath, err
+		}
+
+		if len(cwd) == 1 {
+			break
+		}
+
+		cwd = path.Dir(cwd)
+	}
+
+	return "", LocalDbFileNotFoundErr
 }
 
 func tryEnv() (string, error) {
