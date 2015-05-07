@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/daviddengcn/go-colortext"
-	"github.com/Swatto/td/printer"
+	p "github.com/Swatto/td/printer"
 )
 
 type Todo struct {
@@ -23,10 +23,10 @@ func (t *Todo) MakeOutput() {
 
 	if t.Status == "done" {
 		color = ct.Green
-		symbole = Printer.OkSign
+		symbole = p.OkSign
 	} else {
 		color = ct.Red
-		symbole = Printer.KoSign
+		symbole = p.KoSign
 	}
 
 	hashtag_reg := regexp.MustCompile("#[^\\s]*")
