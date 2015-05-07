@@ -1,6 +1,6 @@
 // +build windows
 
-package Printer
+package printer
 
 const (
 	OkSign = "V"
