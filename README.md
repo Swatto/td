@@ -15,11 +15,9 @@
 
 ### Information
 
-*td* use a environment variable to store your todos `TODO_DB_PATH` where you
-define the path to the futur JSON file. If the file doesn't exist, the program
-will create it for you.
+*td* will look at a `.todos` files to store your todos (like Git does: it will try recursively in each parent folder). This permit to have different list of todos per folder.
 
-But if your current directory has a `.todos` file, it will overwrite the environment variable.
+If it doesn't find a `.todos`, *td* use an environment variable to store your todos: `TODO_DB_PATH` where you define the path to the JSON file. If the file doesn't exist, the program will create it for you.
 
 ### CLI
 
