@@ -8,6 +8,7 @@
 
 ### Installation
 
+- With [Homebrew](http://brew.sh/): `brew install td`
 - From *binary*: go to the [release page](https://github.com/Swatto/td/releases)
 - From *source*: `go get github.com/Swatto/td`
 
