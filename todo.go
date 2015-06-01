@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daviddengcn/go-colortext"
 	p "github.com/Swatto/td/printer"
+	"github.com/daviddengcn/go-colortext"
 )
 
 type Todo struct {
