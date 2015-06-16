@@ -5,6 +5,10 @@ go:
   - 1.4
   - tip
 
+os:
+  - linux
+  - osx
+
 script: go test ./...
 
 notifications:
