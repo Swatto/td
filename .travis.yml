@@ -6,3 +6,6 @@ go:
   - tip
 
 script: go test ./...
+
+notifications:
+  email: false
