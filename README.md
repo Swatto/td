@@ -1,4 +1,4 @@
-# td
+# td [![Build Status](https://travis-ci.org/Swatto/td.svg?branch=master)](https://travis-ci.org/Swatto/td)
 
 > Your todo list in your terminal.
 >
