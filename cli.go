@@ -46,7 +46,7 @@ func main() {
 			if len(collection.Todos) > 0 {
 				fmt.Println()
 				for _, todo := range collection.Todos {
-					todo.MakeOutput()
+					todo.MakeOutput(true)
 				}
 				fmt.Println()
 			} else {
@@ -240,7 +240,7 @@ func main() {
 				if len(collection.Todos) > 0 {
 					fmt.Println()
 					for _, todo := range collection.Todos {
-						todo.MakeOutput()
+						todo.MakeOutput(true)
 					}
 					fmt.Println()
 				} else {
