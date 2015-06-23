@@ -58,6 +58,28 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
+			Name:      "init",
+			ShortName: "i",
+			Usage:     "Initialize a collection of todos",
+			Action: func(c *cli.Context) {
+				cwd, err := os.Getwd()
+				if err != nil {
+					fmt.Printf("%s .\n", err)
+					return
+				}
+
+				err = CreateStoreFileIfNeeded(cwd + "/.todos")
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				if err != nil {
+					fmt.Printf("A \".todos\" file already exist in \"%s\".\n", cwd)
+				} else {
+					fmt.Printf("A \".todos\" file is now added to \"%s\".\n", cwd)
+				}
+				ct.ResetColor()
+				return
+			},
+		},
+		{
 			Name:      "add",
 			ShortName: "a",
 			Usage:     "Add a new todo",

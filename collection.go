@@ -26,6 +26,10 @@ func CreateStoreFileIfNeeded(path string) error {
 		return err
 	}
 
+	if fi.Size() != 0 {
+		return errors.New("StoreAlreadyExist")
+	}
+
 	return nil
 }
 
