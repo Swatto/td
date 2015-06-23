@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"testing"
-	"fmt"
 )
 
 func TestGetDbPath(t *testing.T) {
