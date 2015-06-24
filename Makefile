@@ -1,6 +1,6 @@
 all:
 	rm -fr build
-	goxc -bc="linux,windows,darwin" -d=./build -pv=1.2.0
+	goxc -bc="linux,windows,darwin" -d=./build -pv=1.3.0
 	rmdir debian
 
 clean:
