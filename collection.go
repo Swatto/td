@@ -59,7 +59,12 @@ func (c *Collection) WriteTodos() error {
 
 	defer file.Close()
 
-	err = json.NewEncoder(file).Encode(&c.Todos)
+	data, err := json.MarshalIndent(&c.Todos, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	_, err = file.Write(data)
 	return err
 }
 
