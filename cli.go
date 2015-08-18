@@ -151,7 +151,7 @@ func main() {
 				}
 
 				ct.ChangeColor(ct.Cyan, false, ct.None, false)
-				fmt.Printf("\"%s\" has now a new description: %s", c.Args()[0], c.Args()[1])
+				fmt.Printf("\"%s\" has now a new description: %s\n", c.Args()[0], c.Args()[1])
 				ct.ResetColor()
 			},
 		},
