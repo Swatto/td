@@ -164,10 +164,10 @@ func main() {
 
 				if len(c.Args()) != 1 {
 					fmt.Println()
-					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					ct.ChangeColor(ct.Red, false, ct.None, false)
 					fmt.Println("Error")
 					ct.ResetColor()
-					fmt.Println("You must the id of the item you want to change todo.")
+					fmt.Println("You must provide the position of the item you want to change.")
 					fmt.Println("Example: td toggle 1")
 					fmt.Println()
 					return
@@ -215,12 +215,21 @@ func main() {
 		{
 			Name:      "reorder",
 			ShortName: "r",
-			Usage:     "Reset ids of todo or swap the position of two todo",
+			Usage:     "Reset ids of todo (no arguments) or swap the position of two todos",
 			Action: func(c *cli.Context) {
 				collection := Collection{}
 				collection.RetrieveTodos()
 
-				if len(c.Args()) == 2 {
+				if len(c.Args()) == 1 {
+					fmt.Println()
+					ct.ChangeColor(ct.Red, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
+					fmt.Println("You must provide two position if you want to swap todos.")
+					fmt.Println("Example: td reorder 9 3")
+					fmt.Println()
+					return
+				} else if len(c.Args()) == 2 {
 					idA, err := strconv.ParseInt(c.Args()[0], 10, 32)
 					if err != nil {
 						fmt.Println(err)
