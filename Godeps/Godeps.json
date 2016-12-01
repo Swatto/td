@@ -1,15 +1,24 @@
 {
-	"ImportPath": "github.com/Swatto/td",
-	"GoVersion": "go1.4.1",
+	"ImportPath": "github.com/swatto/td",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/Swatto/td/printer",
+			"Comment": "1.3.0-9-gb46f2dc",
+			"Rev": "b46f2dc265caae0e149ae5cb26f78f911f295e55"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-62-gbf4a526",
-			"Rev": "bf4a526f48af7badd25d2cb02d587e1b01be3b50"
+			"Comment": "v1.19.1",
+			"Rev": "0bdeddeeb0f650497d603c4ad7b20cfe685682f6"
 		},
 		{
 			"ImportPath": "github.com/daviddengcn/go-colortext",
-			"Rev": "13eaeb896f5985a1ab74ddea58707a73d875ba57"
+			"Rev": "511bcaf42ccd42c38aba7427b6673277bf19e2a1"
 		}
 	]
 }
