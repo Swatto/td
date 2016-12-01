@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "td"
 	app.Usage = "Your todos manager"
-	app.Version = "1.3.0"
+	app.Version = "1.4.0"
 	app.Author = "Gaël Gillard"
 	app.Email = "gael@gaelgillard.com"
 	app.Flags = []cli.Flag{

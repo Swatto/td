@@ -8,7 +8,6 @@
 
 ### Installation
 
-- With [Homebrew](http://brew.sh/): `brew install td`
 - From *binary*: go to the [release page](https://github.com/Swatto/td/releases)
 - From *source*: `go get github.com/Swatto/td`
 
@@ -28,7 +27,7 @@ USAGE:
    td [global options] command [command options] [arguments...]
 
 VERSION:
-   1.3.0
+   1.4.0
 
 AUTHOR:
   Gaël Gillard - <gael@gaelgillard.com>
@@ -39,7 +38,7 @@ COMMANDS:
    modify, m   Modify the text of an existing todo
    toggle, t   Toggle the status of a todo by giving his id
    clean Remove finished todos from the list
-   reorder, r  Reset ids of todo
+   reorder, r  Reset ids of todo or swap the position of two todo
    search, s   Search a string in all todos
    help, h  Shows a list of commands or help for one command
 
