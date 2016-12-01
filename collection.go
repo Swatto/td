@@ -170,6 +170,26 @@ func (c *Collection) Reorder() error {
 	return err
 }
 
+func (c *Collection) Swap(idA int64, idB int64) error {
+	var positionA int
+	var positionB int
+
+	for i, todo := range c.Todos {
+		switch todo.Id {
+		case idA:
+			positionA = i
+			todo.Id = idB
+		case idB:
+			positionB = i
+			todo.Id = idA
+		}
+	}
+
+	c.Todos[positionA], c.Todos[positionB] = c.Todos[positionB], c.Todos[positionA]
+	err := c.WriteTodos()
+	return err
+}
+
 func (c *Collection) Search(sentence string) {
 	sentence = regexp.QuoteMeta(sentence)
 	re := regexp.MustCompile("(?i)" + sentence)

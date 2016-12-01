@@ -215,10 +215,42 @@ func main() {
 		{
 			Name:      "reorder",
 			ShortName: "r",
-			Usage:     "Reset ids of todo",
+			Usage:     "Reset ids of todo or swap the position of two todo",
 			Action: func(c *cli.Context) {
 				collection := Collection{}
 				collection.RetrieveTodos()
+
+				if len(c.Args()) == 2 {
+					idA, err := strconv.ParseInt(c.Args()[0], 10, 32)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					idB, err := strconv.ParseInt(c.Args()[1], 10, 32)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					_, err = collection.Find(idA)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					_, err = collection.Find(idB)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					collection.Swap(idA, idB)
+
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Printf("\"%s\" and \"%s\" has been swapped\n", c.Args()[0], c.Args()[1])
+					ct.ResetColor()
+				}
 
 				err := collection.Reorder()
 
