@@ -287,7 +287,7 @@ func main() {
 			fmt.Println("A store for your todos is missing. You have 2 possibilities:")
 			fmt.Println("  1. create a \".todos\" file in your local folder.")
 			fmt.Println("  2. the environment variable \"TODO_DB_PATH\" could be set.")
-			fmt.Println("    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bash_profile)")
+			fmt.Println("    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
 			fmt.Println()
 		}
 
