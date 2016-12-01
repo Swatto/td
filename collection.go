@@ -16,7 +16,7 @@ type Collection struct {
 func CreateStoreFileIfNeeded(path string) error {
 	fi, err := os.Stat(path)
 	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
-		w, err := os.Create(path)
+		w, _ := os.Create(path)
 		_, err = w.WriteString("[]")
 		defer w.Close()
 		return err

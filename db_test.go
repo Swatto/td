@@ -29,7 +29,7 @@ func _CreateFakeDb() error {
 
 	fi, err := os.Stat(cwd)
 	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
-		w, err := os.Create(cwd)
+		w, _ := os.Create(cwd)
 		_, err = w.WriteString("[]")
 		defer w.Close()
 		return err
@@ -51,8 +51,7 @@ func _DeleteFakeDb() error {
 
 	stats, err := os.Stat(cwd)
 	if err == nil && !stats.IsDir() {
-		err := os.Remove(cwd)
-		return err
+		return os.Remove(cwd)
 	}
 
 	if err != nil {

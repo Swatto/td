@@ -1,6 +1,6 @@
 package main
 
-func ExampleTodoStruct() {
+func ExampleTodo() {
 	todo := Todo{
 		Id:       0,
 		Desc:     "Test td",
