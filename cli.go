@@ -194,8 +194,9 @@ func main() {
 			},
 		},
 		{
-			Name:  "clean",
-			Usage: "Remove finished todos from the list",
+			Name:      "clean",
+			ShortName: "c",
+			Usage:     "Remove finished todos from the list",
 			Action: func(c *cli.Context) {
 				collection := Collection{}
 				collection.RetrieveTodos()
