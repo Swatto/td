@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	p "github.com/Swatto/td/printer"
 	"github.com/daviddengcn/go-colortext"
+	p "github.com/vhugo/td/printer"
 )
 
 type Todo struct {
@@ -17,23 +17,33 @@ type Todo struct {
 	Modified string `json:"modified"`
 }
 
+func NewTodo() *Todo {
+	var todo = new(Todo)
+	todo.Status = PENDING
+	return todo
+}
+
 func (t *Todo) MakeOutput(useColor bool) {
 	var symbole string
 	var color ct.Color
 
-	if t.Status == "done" {
+	switch t.Status {
+	case "done":
 		color = ct.Green
 		symbole = p.OkSign
-	} else {
+	case "wip":
+		color = ct.Blue
+		symbole = p.WpSign
+	default:
 		color = ct.Red
 		symbole = p.KoSign
 	}
 
-	hashtag_reg := regexp.MustCompile("#[^\\s]*")
+	hashtagReg := regexp.MustCompile("#[^\\s]*")
 
-	space_count := 6 - len(strconv.FormatInt(t.Id, 10))
+	spaceCount := 6 - len(strconv.FormatInt(t.Id, 10))
 
-	fmt.Print(strings.Repeat(" ", space_count), t.Id, " | ")
+	fmt.Print(strings.Repeat(" ", spaceCount), t.Id, " | ")
 	if useColor == true {
 		ct.ChangeColor(color, false, ct.None, false)
 	}
@@ -43,7 +53,7 @@ func (t *Todo) MakeOutput(useColor bool) {
 	}
 	fmt.Print(" ")
 	pos := 0
-	for _, token := range hashtag_reg.FindAllStringIndex(t.Desc, -1) {
+	for _, token := range hashtagReg.FindAllStringIndex(t.Desc, -1) {
 		fmt.Print(t.Desc[pos:token[0]])
 		if useColor == true {
 			ct.ChangeColor(ct.Yellow, false, ct.None, false)

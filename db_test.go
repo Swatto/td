@@ -1,62 +1,20 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
+	"path"
 	"testing"
+	"time"
 )
 
-func TestGetDbPath(t *testing.T) {
-	err := _CreateFakeDb()
-	if err != nil {
-		t.Error(err)
+func TestWhenFileDoesntExist(t *testing.T) {
+	cwd, _ := os.Getwd()
+	extra := fmt.Sprint("/TODOtestingFOLDER/", time.Now().Format("20060102150405"))
+	os.Setenv(ENVDBPATH, path.Join(cwd, extra))
+	db, _ := NewDataStore()
+	if db.Check() == nil {
+		t.Errorf("Expected database check to return error, but it didn't.")
 	}
-	path := GetDBPath()
-	fmt.Println(path)
-	err = _DeleteFakeDb()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func _CreateFakeDb() error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	cwd = cwd + "/.todos"
-
-	fi, err := os.Stat(cwd)
-	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
-		w, _ := os.Create(cwd)
-		_, err = w.WriteString("[]")
-		defer w.Close()
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func _DeleteFakeDb() error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	cwd = cwd + "/.todos"
-
-	stats, err := os.Stat(cwd)
-	if err == nil && !stats.IsDir() {
-		return os.Remove(cwd)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return errors.New("bad return")
+	os.Unsetenv(ENVDBPATH)
 }

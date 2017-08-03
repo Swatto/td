@@ -9,28 +9,23 @@ import (
 	"time"
 )
 
+const WIP = "wip"
+const DONE = "done"
+const PENDING = "pending"
+
 type Collection struct {
 	Todos []*Todo
 }
 
-func CreateStoreFileIfNeeded(path string) error {
-	fi, err := os.Stat(path)
-	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
-		w, _ := os.Create(path)
-		_, err = w.WriteString("[]")
-		defer w.Close()
-		return err
+func NewCollection() (*Collection, error) {
+	var collection *Collection
+	collection = new(Collection)
+
+	if err := collection.RetrieveTodos(); err != nil {
+		return nil, err
 	}
 
-	if err != nil {
-		return err
-	}
-
-	if fi.Size() != 0 {
-		return errors.New("StoreAlreadyExist")
-	}
-
-	return nil
+	return collection, nil
 }
 
 func (c *Collection) RemoveAtIndex(item int) {
@@ -40,7 +35,15 @@ func (c *Collection) RemoveAtIndex(item int) {
 }
 
 func (c *Collection) RetrieveTodos() error {
-	file, err := os.OpenFile(GetDBPath(), os.O_RDONLY, 0600)
+	db, err := NewDataStore()
+	if err != nil {
+		return err
+	}
+	if err := db.Check(); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(db.Path, os.O_RDONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -52,7 +55,12 @@ func (c *Collection) RetrieveTodos() error {
 }
 
 func (c *Collection) WriteTodos() error {
-	file, err := os.OpenFile(GetDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
+	db, err := NewDataStore()
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(db.Path, os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -68,24 +76,45 @@ func (c *Collection) WriteTodos() error {
 	return err
 }
 
-func (c *Collection) ListPendingTodos() {
+func (c *Collection) ListPendingTodos() error {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
-		if c.Todos[i].Status != "pending" {
+		if c.Todos[i].Status != PENDING {
 			c.RemoveAtIndex(i)
 		}
 	}
+	return nil
 }
 
-func (c *Collection) ListDoneTodos() {
+func (c *Collection) ListUndoneTodos() error {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
-		if c.Todos[i].Status != "done" {
+		if c.Todos[i].Status == DONE {
+			c.RemoveAtIndex(i)
+		}
+	}
+	return nil
+}
+
+func (c *Collection) ListDoneTodos() error {
+	for i := len(c.Todos) - 1; i >= 0; i-- {
+		if c.Todos[i].Status != DONE {
+			c.RemoveAtIndex(i)
+		}
+	}
+	return nil
+}
+
+func (c *Collection) ListWorkInProgressTodos() {
+	for i := len(c.Todos) - 1; i >= 0; i-- {
+		if c.Todos[i].Status != WIP {
 			c.RemoveAtIndex(i)
 		}
 	}
 }
 
 func (c *Collection) CreateTodo(newTodo *Todo) (int64, error) {
+	var err error
 	var highestId int64 = 0
+
 	for _, todo := range c.Todos {
 		if todo.Id > highestId {
 			highestId = todo.Id
@@ -96,7 +125,6 @@ func (c *Collection) CreateTodo(newTodo *Todo) (int64, error) {
 	newTodo.Modified = time.Now().Local().String()
 	c.Todos = append(c.Todos, newTodo)
 
-	err := c.WriteTodos()
 	return newTodo.Id, err
 }
 
@@ -114,27 +142,38 @@ func (c *Collection) Find(id int64) (foundedTodo *Todo, err error) {
 	return
 }
 
-func (c *Collection) Toggle(id int64) (*Todo, error) {
+func (c *Collection) SetStatus(id int64, status string) (*Todo, error) {
 	todo, err := c.Find(id)
 
 	if err != nil {
 		return todo, err
 	}
 
-	if todo.Status == "done" {
-		todo.Status = "pending"
-	} else {
-		todo.Status = "done"
-	}
+	todo.Status = status
 	todo.Modified = time.Now().Local().String()
 
-	err = c.WriteTodos()
+	return todo, err
+}
+
+func (c *Collection) Toggle(id int64) (*Todo, error) {
+	var status string
+
+	todo, err := c.Find(id)
+
 	if err != nil {
-		err = errors.New("Todos couldn't be saved")
 		return todo, err
 	}
 
-	return todo, err
+	switch todo.Status {
+	case PENDING:
+		status = WIP
+	case WIP:
+		status = DONE
+	default:
+		status = PENDING
+	}
+
+	return c.SetStatus(id, status)
 }
 
 func (c *Collection) Modify(id int64, desc string) (*Todo, error) {
@@ -147,27 +186,18 @@ func (c *Collection) Modify(id int64, desc string) (*Todo, error) {
 	todo.Desc = desc
 	todo.Modified = time.Now().Local().String()
 
-	err = c.WriteTodos()
-	if err != nil {
-		err = errors.New("Todos couldn't be saved")
-		return todo, err
-	}
-
 	return todo, err
 }
 
 func (c *Collection) RemoveFinishedTodos() error {
-	c.ListPendingTodos()
-	err := c.WriteTodos()
-	return err
+	return c.ListPendingTodos()
 }
 
 func (c *Collection) Reorder() error {
 	for i, todo := range c.Todos {
 		todo.Id = int64(i + 1)
 	}
-	err := c.WriteTodos()
-	return err
+	return nil
 }
 
 func (c *Collection) Swap(idA int64, idB int64) error {
@@ -186,8 +216,7 @@ func (c *Collection) Swap(idA int64, idB int64) error {
 	}
 
 	c.Todos[positionA], c.Todos[positionB] = c.Todos[positionB], c.Todos[positionA]
-	err := c.WriteTodos()
-	return err
+	return nil
 }
 
 func (c *Collection) Search(sentence string) {

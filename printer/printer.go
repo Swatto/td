@@ -5,4 +5,5 @@ package printer
 const (
 	OkSign = "✓"
 	KoSign = "✕"
+	WpSign = "✦"
 )

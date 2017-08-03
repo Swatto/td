@@ -44,6 +44,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --done, -d     print done todos
+   --wip, -w      print work in progress todos
    --all, -a      print all todos
    --help, -h     show help
    --version, -v  print the version
