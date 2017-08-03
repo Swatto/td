@@ -192,6 +192,10 @@ func main() {
 					return exitError(err)
 				}
 
+				if err := collection.WriteTodos(); err != nil {
+					return exitError(err)
+				}
+
 				var status string
 
 				switch todo.Status {
