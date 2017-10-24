@@ -217,9 +217,38 @@ func main() {
 			Name:      "reorder",
 			ShortName: "r",
 			Usage:     "Reset ids of todo (no arguments) or swap the position of two todos",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "exact, e",
+					Usage: "Reorder the list according to the specified IDs and append the remaining items to the end of the list",
+				},
+			},
 			Action: func(c *cli.Context) {
 				collection := Collection{}
 				collection.RetrieveTodos()
+
+				exact := c.Bool("exact")
+				if exact {
+					ids := make([]int64, len(c.Args()))
+					for i, sid := range c.Args() {
+						id, err := strconv.ParseInt(sid, 10, 32)
+						if err != nil {
+							fmt.Println(err)
+							return
+						}
+						ids[i] = id
+					}
+
+					if err := collection.ReorderByIDs(ids); err != nil {
+						fmt.Println(err)
+						return
+					}
+
+					ct.ChangeColor(ct.Cyan, false, ct.None, false)
+					fmt.Println("Your list is now reordered.")
+					ct.ResetColor()
+					return
+				}
 
 				if len(c.Args()) == 1 {
 					fmt.Println()

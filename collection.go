@@ -199,3 +199,44 @@ func (c *Collection) Search(sentence string) {
 		}
 	}
 }
+
+func (c *Collection) ReorderByIDs(ids []int64) error {
+	idsMap := map[int64]int{}
+	for index, id := range ids {
+		idsMap[id] = index
+	}
+
+	ordered := make([]*Todo, len(ids))
+	rest := []*Todo{}
+
+	for _, todo := range c.Todos {
+		if index, ok := idsMap[todo.Id]; ok {
+			ordered[index] = todo
+			continue
+		}
+		rest = append(rest, todo)
+	}
+
+	newTodos := make([]*Todo, len(c.Todos))
+	index := 0
+	var idCounter int64 = 1
+	for _, todo := range ordered {
+		if todo == nil {
+			continue
+		}
+		todo.Id = idCounter
+		newTodos[index] = todo
+		index++
+		idCounter++
+	}
+	for _, todo := range rest {
+		todo.Id = idCounter
+		newTodos[index] = todo
+		index++
+		idCounter++
+	}
+
+	c.Todos = newTodos
+
+	return c.WriteTodos()
+}
