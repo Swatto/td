@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -203,6 +204,9 @@ func (c *Collection) Search(sentence string) {
 func (c *Collection) ReorderByIDs(ids []int64) error {
 	idsMap := map[int64]int{}
 	for index, id := range ids {
+		if _, ok := idsMap[id]; ok {
+			return fmt.Errorf("The ID %d is already in the list", id)
+		}
 		idsMap[id] = index
 	}
 
