@@ -5,19 +5,29 @@ builds:
   - env:
       - CGO_ENABLED=0
     goos:
-      - linux
-      - windows
       - darwin
+      - freebsd
+      - linux
+      - netbsd
+      - openbsd
+      - windows
     goarch:
+      - 386
       - amd64
+      - arm
       - arm64
 archives:
   - replacements:
       darwin: Darwin
+      freebsd: FreeBSD
       linux: Linux
+      netbsd: NetBSD
+      openbsd: OpenBSD
       windows: Windows
       386: i386
       amd64: x86_64
+      arm: ARM
+      arm64: ARM64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
