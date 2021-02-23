@@ -12,7 +12,7 @@ func TestGetDbPath(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	path := GetDBPath()
+	path := getDBPath()
 	fmt.Println(path)
 	err = _DeleteFakeDb()
 	if err != nil {

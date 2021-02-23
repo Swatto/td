@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-type Collection struct {
-	Todos []*Todo
+type collection struct {
+	Todos []*todo
 }
 
-func CreateStoreFileIfNeeded(path string) error {
+func createStoreFileIfNeeded(path string) error {
 	fi, err := os.Stat(path)
 	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
 		w, _ := os.Create(path)
@@ -33,14 +33,14 @@ func CreateStoreFileIfNeeded(path string) error {
 	return nil
 }
 
-func (c *Collection) RemoveAtIndex(item int) {
+func (c *collection) RemoveAtIndex(item int) {
 	s := *c
 	s.Todos = append(s.Todos[:item], s.Todos[item+1:]...)
 	*c = s
 }
 
-func (c *Collection) RetrieveTodos() error {
-	file, err := os.OpenFile(GetDBPath(), os.O_RDONLY, 0600)
+func (c *collection) RetrieveTodos() error {
+	file, err := os.OpenFile(getDBPath(), os.O_RDONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -51,8 +51,8 @@ func (c *Collection) RetrieveTodos() error {
 	return err
 }
 
-func (c *Collection) WriteTodos() error {
-	file, err := os.OpenFile(GetDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
+func (c *collection) WriteTodos() error {
+	file, err := os.OpenFile(getDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (c *Collection) WriteTodos() error {
 	return err
 }
 
-func (c *Collection) ListPendingTodos() {
+func (c *collection) ListPendingTodos() {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
 		if c.Todos[i].Status != "pending" {
 			c.RemoveAtIndex(i)
@@ -76,7 +76,7 @@ func (c *Collection) ListPendingTodos() {
 	}
 }
 
-func (c *Collection) ListDoneTodos() {
+func (c *collection) ListDoneTodos() {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
 		if c.Todos[i].Status != "done" {
 			c.RemoveAtIndex(i)
@@ -84,26 +84,26 @@ func (c *Collection) ListDoneTodos() {
 	}
 }
 
-func (c *Collection) CreateTodo(newTodo *Todo) (int64, error) {
-	var highestId int64 = 0
+func (c *collection) CreateTodo(newTodo *todo) (int64, error) {
+	var highestID int64 = 0
 	for _, todo := range c.Todos {
-		if todo.Id > highestId {
-			highestId = todo.Id
+		if todo.ID > highestID {
+			highestID = todo.ID
 		}
 	}
 
-	newTodo.Id = (highestId + 1)
+	newTodo.ID = (highestID + 1)
 	newTodo.Modified = time.Now().Local().String()
 	c.Todos = append(c.Todos, newTodo)
 
 	err := c.WriteTodos()
-	return newTodo.Id, err
+	return newTodo.ID, err
 }
 
-func (c *Collection) Find(id int64) (foundedTodo *Todo, err error) {
+func (c *collection) Find(id int64) (foundedTodo *todo, err error) {
 	founded := false
 	for _, todo := range c.Todos {
-		if id == todo.Id {
+		if id == todo.ID {
 			foundedTodo = todo
 			founded = true
 		}
@@ -114,7 +114,7 @@ func (c *Collection) Find(id int64) (foundedTodo *Todo, err error) {
 	return
 }
 
-func (c *Collection) Toggle(id int64) (*Todo, error) {
+func (c *collection) Toggle(id int64) (*todo, error) {
 	todo, err := c.Find(id)
 
 	if err != nil {
@@ -137,7 +137,7 @@ func (c *Collection) Toggle(id int64) (*Todo, error) {
 	return todo, err
 }
 
-func (c *Collection) Modify(id int64, desc string) (*Todo, error) {
+func (c *collection) Modify(id int64, desc string) (*todo, error) {
 	todo, err := c.Find(id)
 
 	if err != nil {
@@ -156,32 +156,32 @@ func (c *Collection) Modify(id int64, desc string) (*Todo, error) {
 	return todo, err
 }
 
-func (c *Collection) RemoveFinishedTodos() error {
+func (c *collection) RemoveFinishedTodos() error {
 	c.ListPendingTodos()
 	err := c.WriteTodos()
 	return err
 }
 
-func (c *Collection) Reorder() error {
+func (c *collection) Reorder() error {
 	for i, todo := range c.Todos {
-		todo.Id = int64(i + 1)
+		todo.ID = int64(i + 1)
 	}
 	err := c.WriteTodos()
 	return err
 }
 
-func (c *Collection) Swap(idA int64, idB int64) error {
+func (c *collection) Swap(idA int64, idB int64) error {
 	var positionA int
 	var positionB int
 
 	for i, todo := range c.Todos {
-		switch todo.Id {
+		switch todo.ID {
 		case idA:
 			positionA = i
-			todo.Id = idB
+			todo.ID = idB
 		case idB:
 			positionB = i
-			todo.Id = idA
+			todo.ID = idA
 		}
 	}
 
@@ -190,7 +190,7 @@ func (c *Collection) Swap(idA int64, idB int64) error {
 	return err
 }
 
-func (c *Collection) Search(sentence string) {
+func (c *collection) Search(sentence string) {
 	sentence = regexp.QuoteMeta(sentence)
 	re := regexp.MustCompile("(?i)" + sentence)
 	for i := len(c.Todos) - 1; i >= 0; i-- {

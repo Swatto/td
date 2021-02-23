@@ -27,7 +27,7 @@ USAGE:
    td [global options] command [command options] [arguments...]
 
 VERSION:
-   1.4.0
+   1.4.1
 
 AUTHOR:
   Gaël Gillard - <gael@gaelgillard.com>
@@ -53,7 +53,7 @@ GLOBAL OPTIONS:
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Gaël Gillard
+Copyright (c) 2021 Gaël Gillard
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

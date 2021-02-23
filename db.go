@@ -6,17 +6,17 @@ import (
 	"path"
 )
 
-var IsNotAFileErr = errors.New("The database path is not a file")
-var LocalDbFileNotFoundErr = errors.New("The local .todos file was not found")
+var errIsNotAFile = errors.New("The database path is not a file")
+var errLocalDbFileNotFound = errors.New("The local .todos file was not found")
 
 var cachedDBPath = ""
 
-func GetDBPath() string {
+func getDBPath() string {
 	if cachedDBPath != "" {
 		return cachedDBPath
 	}
 
-	dbPath, err := getDBPath()
+	dbPath, err := calculateDBPath()
 	if err != nil {
 		return ""
 	}
@@ -25,7 +25,7 @@ func GetDBPath() string {
 	return dbPath
 }
 
-func getDBPath() (string, error) {
+func calculateDBPath() (string, error) {
 	dbPath, err := tryCwdAndParentFolders()
 	if err != nil {
 		dbPath, err = tryEnv()
@@ -41,7 +41,7 @@ func tryDir(dir string) (string, error) {
 	}
 
 	if fi.IsDir() {
-		return "", IsNotAFileErr
+		return "", errIsNotAFile
 	}
 
 	return dbPath, nil
@@ -66,7 +66,7 @@ func tryCwdAndParentFolders() (string, error) {
 		cwd = path.Dir(cwd)
 	}
 
-	return "", LocalDbFileNotFoundErr
+	return "", errLocalDbFileNotFound
 }
 
 func tryEnv() (string, error) {

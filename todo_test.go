@@ -1,8 +1,8 @@
 package main
 
-func ExampleTodo() {
-	todo := Todo{
-		Id:       0,
+func Exampletodo() {
+	todo := todo{
+		ID:       0,
 		Desc:     "Test td",
 		Status:   "pending",
 		Modified: "",

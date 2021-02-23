@@ -5,17 +5,17 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/codegangsta/cli"
-	"github.com/daviddengcn/go-colortext"
+	ct "github.com/daviddengcn/go-colortext"
+	"github.com/urfave/cli"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "td"
 	app.Usage = "Your todos manager"
-	app.Version = "1.4.0"
+	app.Version = "1.4.1"
 	app.Author = "Gaël Gillard"
-	app.Email = "gael@gaelgillard.com"
+	app.Email = "gillardgael@gmail.com"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "done, d",
@@ -28,7 +28,7 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) {
 		var err error
-		collection := Collection{}
+		collection := collection{}
 
 		err = collection.RetrieveTodos()
 		if err != nil {
@@ -68,7 +68,7 @@ func main() {
 					return
 				}
 
-				err = CreateStoreFileIfNeeded(cwd + "/.todos")
+				err = createStoreFileIfNeeded(cwd + "/.todos")
 				ct.ChangeColor(ct.Cyan, false, ct.None, false)
 				if err != nil {
 					fmt.Printf("A \".todos\" file already exist in \"%s\".\n", cwd)
@@ -96,9 +96,9 @@ func main() {
 					return
 				}
 
-				collection := Collection{}
-				todo := Todo{
-					Id:       0,
+				collection := collection{}
+				todo := todo{
+					ID:       0,
 					Desc:     c.Args()[0],
 					Status:   "pending",
 					Modified: "",
@@ -135,7 +135,7 @@ func main() {
 					return
 				}
 
-				collection := Collection{}
+				collection := collection{}
 				collection.RetrieveTodos()
 
 				id, err := strconv.ParseInt(c.Args()[0], 10, 32)
@@ -173,7 +173,7 @@ func main() {
 					return
 				}
 
-				collection := Collection{}
+				collection := collection{}
 				collection.RetrieveTodos()
 
 				id, err := strconv.ParseInt(c.Args()[0], 10, 32)
@@ -198,7 +198,7 @@ func main() {
 			ShortName: "c",
 			Usage:     "Remove finished todos from the list",
 			Action: func(c *cli.Context) {
-				collection := Collection{}
+				collection := collection{}
 				collection.RetrieveTodos()
 
 				err := collection.RemoveFinishedTodos()
@@ -206,11 +206,11 @@ func main() {
 				if err != nil {
 					fmt.Println(err)
 					return
-				} else {
-					ct.ChangeColor(ct.Cyan, false, ct.None, false)
-					fmt.Println("Your list is now flushed of finished todos.")
-					ct.ResetColor()
 				}
+
+				ct.ChangeColor(ct.Cyan, false, ct.None, false)
+				fmt.Println("Your list is now flushed of finished todos.")
+				ct.ResetColor()
 			},
 		},
 		{
@@ -218,7 +218,7 @@ func main() {
 			ShortName: "r",
 			Usage:     "Reset ids of todo (no arguments) or swap the position of two todos",
 			Action: func(c *cli.Context) {
-				collection := Collection{}
+				collection := collection{}
 				collection.RetrieveTodos()
 
 				if len(c.Args()) == 1 {
@@ -290,7 +290,7 @@ func main() {
 					return
 				}
 
-				collection := Collection{}
+				collection := collection{}
 				collection.RetrieveTodos()
 				collection.Search(c.Args()[0])
 
@@ -318,7 +318,7 @@ func main() {
 
 	app.Before = func(c *cli.Context) error {
 		var err error
-		path := GetDBPath()
+		path := getDBPath()
 
 		if path == "" {
 			fmt.Println()
@@ -333,7 +333,7 @@ func main() {
 			fmt.Println()
 		}
 
-		CreateStoreFileIfNeeded(path)
+		createStoreFileIfNeeded(path)
 
 		return err
 	}
