@@ -4,7 +4,7 @@ on:
     tags:
       - '*'
 jobs:
-  runner:
+  gh-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +19,10 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  homebrew-updater:
+    runs-on: macos-latest
+    steps:
+      - uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.GH_ACCESS_TOKEN}}
+          formula: td
