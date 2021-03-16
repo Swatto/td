@@ -4,10 +4,14 @@ on: [push]
 jobs:
   runner:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.16', '1.15', '1.14' ]
+    name: Go ${{ matrix.go }} build and test
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: ${{ matrix.go }}
       - run: go build .
       - run: go test -v ./...
