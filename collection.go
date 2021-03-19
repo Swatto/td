@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -198,4 +199,48 @@ func (c *collection) Search(sentence string) {
 			c.RemoveAtIndex(i)
 		}
 	}
+}
+
+func (c *Collection) ReorderByIDs(ids []int64) error {
+	idsMap := map[int64]int{}
+	for index, id := range ids {
+		if _, ok := idsMap[id]; ok {
+			return fmt.Errorf("The ID %d is already in the list", id)
+		}
+		idsMap[id] = index
+	}
+
+	ordered := make([]*Todo, len(ids))
+	rest := []*Todo{}
+
+	for _, todo := range c.Todos {
+		if index, ok := idsMap[todo.Id]; ok {
+			ordered[index] = todo
+			continue
+		}
+		rest = append(rest, todo)
+	}
+
+	newTodos := make([]*Todo, len(c.Todos))
+	index := 0
+	var idCounter int64 = 1
+	for _, todo := range ordered {
+		if todo == nil {
+			continue
+		}
+		todo.Id = idCounter
+		newTodos[index] = todo
+		index++
+		idCounter++
+	}
+	for _, todo := range rest {
+		todo.Id = idCounter
+		newTodos[index] = todo
+		index++
+		idCounter++
+	}
+
+	c.Todos = newTodos
+
+	return c.WriteTodos()
 }
