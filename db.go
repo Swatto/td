@@ -6,8 +6,8 @@ import (
 	"path"
 )
 
-var errIsNotAFile = errors.New("The database path is not a file")
-var errLocalDbFileNotFound = errors.New("The local .todos file was not found")
+var errIsNotAFile = errors.New("the database path is not a file")
+var errLocalDbFileNotFound = errors.New("the local .todos file was not found")
 
 var cachedDBPath = ""
 

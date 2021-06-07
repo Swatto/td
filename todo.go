@@ -29,27 +29,27 @@ func (t *todo) MakeOutput(useColor bool) {
 		symbole = printer.KoSign
 	}
 
-	hashtagReg := regexp.MustCompile("#[^\\s]*")
+	hashtagReg := regexp.MustCompile(`#[^\\s]*`)
 
 	spaceCount := 6 - len(strconv.FormatInt(t.ID, 10))
 
 	fmt.Print(strings.Repeat(" ", spaceCount), t.ID, " | ")
-	if useColor == true {
+	if useColor {
 		ct.ChangeColor(color, false, ct.None, false)
 	}
 	fmt.Print(symbole)
-	if useColor == true {
+	if useColor {
 		ct.ResetColor()
 	}
 	fmt.Print(" ")
 	pos := 0
 	for _, token := range hashtagReg.FindAllStringIndex(t.Desc, -1) {
 		fmt.Print(t.Desc[pos:token[0]])
-		if useColor == true {
+		if useColor {
 			ct.ChangeColor(ct.Yellow, false, ct.None, false)
 		}
 		fmt.Print(t.Desc[token[0]:token[1]])
-		if useColor == true {
+		if useColor {
 			ct.ResetColor()
 		}
 		pos = token[1]

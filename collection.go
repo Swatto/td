@@ -130,7 +130,7 @@ func (c *collection) Toggle(id int64) (*todo, error) {
 
 	err = c.WriteTodos()
 	if err != nil {
-		err = errors.New("Todos couldn't be saved")
+		err = errors.New("todos couldn't be saved")
 		return todo, err
 	}
 
@@ -149,7 +149,7 @@ func (c *collection) Modify(id int64, desc string) (*todo, error) {
 
 	err = c.WriteTodos()
 	if err != nil {
-		err = errors.New("Todos couldn't be saved")
+		err = errors.New("todos couldn't be saved")
 		return todo, err
 	}
 
