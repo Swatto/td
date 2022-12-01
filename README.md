@@ -10,7 +10,7 @@
 
 - From *homebrew*: `brew install td`
 - From *binary*: go to the [release page](https://github.com/Swatto/td/releases)
-- From *source*: `go get github.com/Swatto/td`
+- From *source*: `go install github.com/Swatto/td@latest`
 
 ### Information
 
