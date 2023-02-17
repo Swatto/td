@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"umutsevdi/td/db"
+	"umutsevdi/td/todo"
 
 	ct "github.com/daviddengcn/go-colortext"
 	cli "github.com/urfave/cli/v2"
@@ -19,11 +21,15 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "td"
 	app.Usage = "Your todos manager"
-	app.Version = "1.4.2"
+	app.Version = "1.4.2~fork"
 	app.Authors = []*cli.Author{
 		{
 			Name:  "Gaël Gillard",
 			Email: "gillardgael@gmail.com",
+		},
+		{
+			Name:  "Umut Sevdi",
+			Email: "sevdiumut@gmail.com",
 		},
 	}
 	app.Flags = []cli.Flag{
@@ -38,7 +44,7 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		var err error
-		collection := collection{}
+		collection := db.Collection{}
 
 		err = collection.RetrieveTodos()
 		if err != nil {
@@ -78,7 +84,7 @@ func main() {
 					return err
 				}
 
-				err = createStoreFileIfNeeded(cwd + "/.todos")
+				err = db.CreateStoreFileIfNeeded(cwd + "/.todos")
 				ct.ChangeColor(ct.Cyan, false, ct.None, false)
 				if err != nil {
 					fmt.Printf("A \".todos\" file already exist in \"%s\".\n", cwd)
@@ -95,7 +101,7 @@ func main() {
 			Usage:   "Add a new todo",
 			Action: func(c *cli.Context) error {
 
-				if c.Args().Len() != 1 {
+				if c.Args().Len() == 0 {
 					fmt.Println()
 					ct.ChangeColor(ct.Red, false, ct.None, false)
 					fmt.Println("Error")
@@ -106,13 +112,35 @@ func main() {
 					return argError
 				}
 
-				collection := collection{}
-				todo := todo{
+				collection := db.Collection{}
+				dt, dtErr := parseDate(c.Args().Get(1))
+				if dtErr != nil {
+					fmt.Println()
+					ct.ChangeColor(ct.Red, false, ct.None, false)
+					fmt.Println("Error")
+					ct.ResetColor()
+					fmt.Println("Invalid date time format")
+					fmt.Println("Available Formats: \"[dd/MM/yyyy] [hh:mm]\"")
+					fmt.Println()
+					return argError
+				}
+				p, _ := strconv.Atoi(c.Args().Get(2))
+				todo := todo.Todo{
 					ID:       0,
 					Desc:     c.Args().Get(0),
 					Status:   "pending",
 					Modified: "",
+					Deadline: dt,
+					Period:   uint64(p),
 				}
+				ct.ChangeColor(ct.Blue, false, ct.None, false)
+				if !dt.IsZero() {
+					fmt.Println("Deadline added")
+				}
+				if p != 0 {
+					fmt.Println("Periodic to do created")
+				}
+				ct.ResetColor()
 				err := collection.RetrieveTodos()
 				if err != nil {
 					fmt.Println(err)
@@ -148,7 +176,7 @@ func main() {
 					return argError
 				}
 
-				collection := collection{}
+				collection := db.Collection{}
 				collection.RetrieveTodos()
 
 				args := c.Args()
@@ -189,7 +217,7 @@ func main() {
 					return argError
 				}
 
-				collection := collection{}
+				collection := db.Collection{}
 				collection.RetrieveTodos()
 
 				id, err := strconv.ParseInt(c.Args().Get(0), 10, 32)
@@ -215,7 +243,7 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "Remove finished todos from the list",
 			Action: func(c *cli.Context) error {
-				collection := collection{}
+				collection := db.Collection{}
 				collection.RetrieveTodos()
 
 				err := collection.RemoveFinishedTodos()
@@ -236,7 +264,7 @@ func main() {
 			Aliases: []string{"r"},
 			Usage:   "Reset ids of todo (no arguments) or swap the position of two todos",
 			Action: func(c *cli.Context) error {
-				collection := collection{}
+				collection := db.Collection{}
 				collection.RetrieveTodos()
 
 				if c.Args().Len() != 1 {
@@ -309,7 +337,7 @@ func main() {
 					return argError
 				}
 
-				collection := collection{}
+				collection := db.Collection{}
 				collection.RetrieveTodos()
 				collection.Search(c.Args().Get(0))
 
@@ -338,7 +366,7 @@ func main() {
 
 	app.Before = func(c *cli.Context) error {
 		var err error
-		path := getDBPath()
+		path := db.GetDBPath()
 
 		if path == "" {
 			fmt.Println()
@@ -352,9 +380,7 @@ func main() {
 			fmt.Println("    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
 			fmt.Println()
 		}
-
-		createStoreFileIfNeeded(path)
-
+		db.CreateStoreFileIfNeeded(path)
 		return err
 	}
 

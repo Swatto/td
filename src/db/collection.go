@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"encoding/json"
@@ -7,13 +7,14 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"umutsevdi/td/todo"
 )
 
-type collection struct {
-	Todos []*todo
+type Collection struct {
+	Todos []*todo.Todo
 }
 
-func createStoreFileIfNeeded(path string) error {
+func CreateStoreFileIfNeeded(path string) error {
 	fi, err := os.Stat(path)
 	if (err != nil && os.IsNotExist(err)) || fi.Size() == 0 {
 		w, _ := os.Create(path)
@@ -33,14 +34,14 @@ func createStoreFileIfNeeded(path string) error {
 	return nil
 }
 
-func (c *collection) RemoveAtIndex(item int) {
+func (c *Collection) RemoveAtIndex(item int) {
 	s := *c
 	s.Todos = append(s.Todos[:item], s.Todos[item+1:]...)
 	*c = s
 }
 
-func (c *collection) RetrieveTodos() error {
-	file, err := os.OpenFile(getDBPath(), os.O_RDONLY, 0600)
+func (c *Collection) RetrieveTodos() error {
+	file, err := os.OpenFile(GetDBPath(), os.O_RDONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -51,8 +52,8 @@ func (c *collection) RetrieveTodos() error {
 	return err
 }
 
-func (c *collection) WriteTodos() error {
-	file, err := os.OpenFile(getDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
+func (c *Collection) WriteTodos() error {
+	file, err := os.OpenFile(GetDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (c *collection) WriteTodos() error {
 	return err
 }
 
-func (c *collection) ListPendingTodos() {
+func (c *Collection) ListPendingTodos() {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
 		if c.Todos[i].Status != "pending" {
 			c.RemoveAtIndex(i)
@@ -76,7 +77,7 @@ func (c *collection) ListPendingTodos() {
 	}
 }
 
-func (c *collection) ListDoneTodos() {
+func (c *Collection) ListDoneTodos() {
 	for i := len(c.Todos) - 1; i >= 0; i-- {
 		if c.Todos[i].Status != "done" {
 			c.RemoveAtIndex(i)
@@ -84,7 +85,7 @@ func (c *collection) ListDoneTodos() {
 	}
 }
 
-func (c *collection) CreateTodo(newTodo *todo) (int64, error) {
+func (c *Collection) CreateTodo(newTodo *todo.Todo) (int64, error) {
 	var highestID int64 = 0
 	for _, todo := range c.Todos {
 		if todo.ID > highestID {
@@ -100,7 +101,7 @@ func (c *collection) CreateTodo(newTodo *todo) (int64, error) {
 	return newTodo.ID, err
 }
 
-func (c *collection) Find(id int64) (foundedTodo *todo, err error) {
+func (c *Collection) Find(id int64) (foundedTodo *todo.Todo, err error) {
 	founded := false
 	for _, todo := range c.Todos {
 		if id == todo.ID {
@@ -114,7 +115,7 @@ func (c *collection) Find(id int64) (foundedTodo *todo, err error) {
 	return
 }
 
-func (c *collection) Toggle(id int64) (*todo, error) {
+func (c *Collection) Toggle(id int64) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 
 	if err != nil {
@@ -137,7 +138,7 @@ func (c *collection) Toggle(id int64) (*todo, error) {
 	return todo, err
 }
 
-func (c *collection) Modify(id int64, desc string) (*todo, error) {
+func (c *Collection) Modify(id int64, desc string) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 
 	if err != nil {
@@ -156,13 +157,13 @@ func (c *collection) Modify(id int64, desc string) (*todo, error) {
 	return todo, err
 }
 
-func (c *collection) RemoveFinishedTodos() error {
+func (c *Collection) RemoveFinishedTodos() error {
 	c.ListPendingTodos()
 	err := c.WriteTodos()
 	return err
 }
 
-func (c *collection) Reorder() error {
+func (c *Collection) Reorder() error {
 	for i, todo := range c.Todos {
 		todo.ID = int64(i + 1)
 	}
@@ -170,7 +171,7 @@ func (c *collection) Reorder() error {
 	return err
 }
 
-func (c *collection) Swap(idA int64, idB int64) error {
+func (c *Collection) Swap(idA int64, idB int64) error {
 	var positionA int
 	var positionB int
 
@@ -190,7 +191,7 @@ func (c *collection) Swap(idA int64, idB int64) error {
 	return err
 }
 
-func (c *collection) Search(sentence string) {
+func (c *Collection) Search(sentence string) {
 	sentence = regexp.QuoteMeta(sentence)
 	re := regexp.MustCompile("(?i)" + sentence)
 	for i := len(c.Todos) - 1; i >= 0; i-- {

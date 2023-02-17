@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ var errLocalDbFileNotFound = errors.New("the local .todos file was not found")
 
 var cachedDBPath = ""
 
-func getDBPath() string {
+func GetDBPath() string {
 	if cachedDBPath != "" {
 		return cachedDBPath
 	}

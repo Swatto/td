@@ -1,7 +1,9 @@
-package main
+package test
 
-func Exampletodo() {
-	todo := todo{
+import "umutsevdi/td/todo"
+
+func ExampleTodo() {
+	todo := todo.Todo{
 		ID:       0,
 		Desc:     "Test td",
 		Status:   "pending",

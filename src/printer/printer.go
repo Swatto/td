@@ -5,4 +5,6 @@ package printer
 const (
 	OkSign = "✓"
 	KoSign = "✕"
+    DeadlineSign = " ⏱ "
+    PeriodSign = " 🗘 "
 )

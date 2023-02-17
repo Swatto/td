@@ -1,23 +1,26 @@
-package main
+package todo
 
 import (
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	ct "github.com/daviddengcn/go-colortext"
-	"github.com/swatto/td/printer"
+	"umutsevdi/td/printer"
 )
 
-type todo struct {
-	ID       int64  `json:"id"`
-	Desc     string `json:"desc"`
-	Status   string `json:"status"`
-	Modified string `json:"modified"`
+type Todo struct {
+	ID       int64     `json:"id"`
+	Desc     string    `json:"desc"`
+	Status   string    `json:"status"`
+	Modified string    `json:"modified"`
+	Period   uint64    `json:"period"`
+	Deadline time.Time `json:"deadline"`
 }
 
-func (t *todo) MakeOutput(useColor bool) {
+func (t *Todo) MakeOutput(useColor bool) {
 	var symbole string
 	var color ct.Color
 
@@ -54,5 +57,12 @@ func (t *todo) MakeOutput(useColor bool) {
 		}
 		pos = token[1]
 	}
-	fmt.Println(t.Desc[pos:])
+	fmt.Print(t.Desc[pos:])
+	if !t.Deadline.IsZero() {
+		fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan 15:04"))
+	}
+	if t.Period != 0 {
+		fmt.Print(printer.PeriodSign, t.Period)
+	}
+	fmt.Println(" ")
 }
