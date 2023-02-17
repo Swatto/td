@@ -4,18 +4,14 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 	"umutsevdi/td/db"
 	"umutsevdi/td/todo"
 
 	ct "github.com/daviddengcn/go-colortext"
 	cli "github.com/urfave/cli/v2"
 )
-
-type Error string
-
-func (e Error) Error() string { return string(e) }
-
-const argError = Error("Error in argument")
 
 func main() {
 	app := cli.NewApp()
@@ -102,26 +98,15 @@ func main() {
 			Action: func(c *cli.Context) error {
 
 				if c.Args().Len() == 0 {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("You must provide a name to your todo.")
-					fmt.Println("Example: td add \"call mum\"")
-					fmt.Println()
+					WriteError("You must provide a name to your todo.",
+						"Example: td add \"call mum\"")
 					return argError
 				}
 
 				collection := db.Collection{}
 				dt, dtErr := parseDate(c.Args().Get(1))
 				if dtErr != nil {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("Invalid date time format")
-					fmt.Println("Available Formats: \"[dd/MM/yyyy] [hh:mm]\"")
-					fmt.Println()
+					WriteError("Invalid date time format\nAvailable Formats: \"[dd/MM/yyyy] [hh:mm]\"")
 					return argError
 				}
 				p, _ := strconv.Atoi(c.Args().Get(2))
@@ -131,7 +116,8 @@ func main() {
 					Status:   "pending",
 					Modified: "",
 					Deadline: dt,
-					Period:   uint64(p),
+					Period:   p,
+					Created:  time.Now(),
 				}
 				ct.ChangeColor(ct.Blue, false, ct.None, false)
 				if !dt.IsZero() {
@@ -166,13 +152,8 @@ func main() {
 			Action: func(c *cli.Context) error {
 
 				if c.Args().Len() != 2 {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("You must provide the id and the new text for your todo.")
+					WriteError("You must provide the id and the new text for your todo.")
 					fmt.Println("Example: td modify 2 \"call dad\"")
-					fmt.Println()
 					return argError
 				}
 
@@ -207,13 +188,8 @@ func main() {
 				var err error
 
 				if c.Args().Len() != 1 {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("You must provide the position of the item you want to change.")
-					fmt.Println("Example: td toggle 1")
-					fmt.Println()
+					WriteError("You must provide the position of the item you want to change.",
+						"Example: td toggle 1")
 					return argError
 				}
 
@@ -268,13 +244,8 @@ func main() {
 				collection.RetrieveTodos()
 
 				if c.Args().Len() != 1 {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("You must provide two position if you want to swap todos.")
-					fmt.Println("Example: td reorder 9 3")
-					fmt.Println()
+					WriteError("You must provide two position if you want to swap todos.",
+						"Example: td reorder 9 3")
 					return argError
 				} else if c.Args().Len() != 2 {
 					idA, err := strconv.ParseInt(c.Args().Get(0), 10, 32)
@@ -327,13 +298,8 @@ func main() {
 			Usage:   "Search a string in all todos",
 			Action: func(c *cli.Context) error {
 				if c.Args().Len() != 1 {
-					fmt.Println()
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Println("Error")
-					ct.ResetColor()
-					fmt.Println("You must provide a string earch.")
-					fmt.Println("Example: td search \"project-1\"")
-					fmt.Println()
+					WriteError("You must provide a string earch.",
+						"Example: td search \"project-1\"")
 					return argError
 				}
 
@@ -369,20 +335,23 @@ func main() {
 		path := db.GetDBPath()
 
 		if path == "" {
-			fmt.Println()
-			ct.ChangeColor(ct.Red, false, ct.None, false)
-			fmt.Println("Error")
-			fmt.Println("-----")
-			ct.ResetColor()
-			fmt.Println("A store for your todos is missing. You have 2 possibilities:")
-			fmt.Println("  1. create a \".todos\" file in your local folder.")
-			fmt.Println("  2. the environment variable \"TODO_DB_PATH\" could be set.")
-			fmt.Println("    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
-			fmt.Println()
+			WriteError("A store for your todos is missing. You have 2 possibilities:",
+				"  1. create a \".todos\" file in your local folder.",
+				"  2. the environment variable \"TODO_DB_PATH\" could be set.",
+				"    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
 		}
 		db.CreateStoreFileIfNeeded(path)
 		return err
 	}
 
 	app.Run(os.Args)
+}
+
+func WriteError(v ...string) {
+	fmt.Println()
+	ct.ChangeColor(ct.Red, false, ct.None, false)
+	fmt.Print("Error: ")
+	ct.ResetColor()
+	fmt.Println(strings.Join(v, "\n"))
+	fmt.Println()
 }

@@ -16,8 +16,9 @@ type Todo struct {
 	Desc     string    `json:"desc"`
 	Status   string    `json:"status"`
 	Modified string    `json:"modified"`
-	Period   uint64    `json:"period"`
+	Period   int       `json:"period"`
 	Deadline time.Time `json:"deadline"`
+	Created  time.Time `json:"created"`
 }
 
 func (t *Todo) MakeOutput(useColor bool) {
