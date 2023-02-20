@@ -101,18 +101,13 @@ func (c *Collection) CreateTodo(newTodo *todo.Todo) (int64, error) {
 	return newTodo.ID, err
 }
 
-func (c *Collection) Find(id int64) (foundedTodo *todo.Todo, err error) {
-	founded := false
+func (c *Collection) Find(id int64) (*todo.Todo, error) {
 	for _, todo := range c.Todos {
 		if id == todo.ID {
-			foundedTodo = todo
-			founded = true
+			return todo, nil
 		}
 	}
-	if !founded {
-		err = errors.New("The todo with the id " + strconv.FormatInt(id, 10) + " was not found.")
-	}
-	return
+	return nil, errors.New("The todo with the id " + strconv.FormatInt(id, 10) + " was not found.")
 }
 
 func (c *Collection) Toggle(id int64) (*todo.Todo, error) {
@@ -121,31 +116,26 @@ func (c *Collection) Toggle(id int64) (*todo.Todo, error) {
 	if err != nil {
 		return todo, err
 	}
+	if todo.Period > 0 {
+		todo.Period--
+		todo.Modified = time.Now().Local().String()
+		//		if !todo.Deadline.IsZero() {
+		//		todo.Deadline = todo.Deadline.Add(todo.Deadline.Sub(todo.Created))
+		//	}
+		c.WriteTodos()
+		if err != nil {
+			err = errors.New("todos couldn't be saved")
+			return todo, err
+		}
+
+		return todo, nil
+	}
 
 	if todo.Status == "done" {
 		todo.Status = "pending"
 	} else {
 		todo.Status = "done"
 	}
-	todo.Modified = time.Now().Local().String()
-
-	err = c.WriteTodos()
-	if err != nil {
-		err = errors.New("todos couldn't be saved")
-		return todo, err
-	}
-
-	return todo, err
-}
-
-func (c *Collection) Modify(id int64, desc string) (*todo.Todo, error) {
-	todo, err := c.Find(id)
-
-	if err != nil {
-		return todo, err
-	}
-
-	todo.Desc = desc
 	todo.Modified = time.Now().Local().String()
 
 	err = c.WriteTodos()
@@ -199,4 +189,13 @@ func (c *Collection) Search(sentence string) {
 			c.RemoveAtIndex(i)
 		}
 	}
+}
+
+func (c *Collection) FilterByDate(date time.Time) {
+	for i, v := range c.Todos {
+		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
+			c.RemoveAtIndex(i)
+		}
+	}
+
 }

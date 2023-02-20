@@ -58,7 +58,7 @@ func (t *Todo) MakeOutput(useColor bool) {
 		}
 		pos = token[1]
 	}
-	fmt.Print(t.Desc[pos:])
+	fmt.Printf("%-25s", t.Desc[pos:])
 	if !t.Deadline.IsZero() {
 		fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan 15:04"))
 	}
