@@ -3,6 +3,7 @@ package main
 import (
 	cli "github.com/urfave/cli/v2"
 	"os"
+	"umutsevdi/td/cmd"
 	"umutsevdi/td/db"
 )
 
@@ -23,6 +24,10 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		&cli.BoolFlag{
+			Name:  "past, p",
+			Usage: "print todos that are past due",
+		},
+		&cli.BoolFlag{
 			Name:  "done, d",
 			Usage: "print done todos",
 		},
@@ -31,55 +36,61 @@ func main() {
 			Usage: "print all todos",
 		},
 	}
-	app.Action = tdList
+	app.Action = cmd.TdList
 	app.Commands = []*cli.Command{
 		{
 			Name:    "init",
 			Aliases: []string{"i"},
 			Usage:   "Initialize a collection of todos",
-			Action:  tdInit,
+			Action:  cmd.TdInit,
 		},
 		{
 			Name:    "add",
 			Aliases: []string{"a"},
 			Usage:   "Add a new todo",
-			Action:  tdAdd,
+			Action:  cmd.TdAdd,
 		},
 		{
 			Name:    "modify",
 			Aliases: []string{"m"},
-			Usage:   "Modify the text of an existing todo",
-			Action:  tdModify,
+			Usage:   "Modify the text or any property of an existing todo",
+			Action:  cmd.TdModify,
 		},
 		{
 			Name:    "toggle",
 			Aliases: []string{"t"},
 			Usage:   "Toggle the status of a todo by giving his id",
-			Action:  tdToggle,
+			Action:  cmd.TdToggle,
 		},
 		{
-			Name:    "clean",
-			Aliases: []string{"c"},
-			Usage:   "Remove finished todos from the list",
-			Action:  tdClean,
+			Name:    "delete",
+			Aliases: []string{"d"},
+			Usage:   "Remove an existing todo",
+			Action:  cmd.TdRemove,
 		},
+		//{
+		//	Name:    "clean",
+		//	Aliases: []string{"c"},
+		//	Usage:   "Remove finished todos from the list",
+		//	Action:  cmd.TdClean,
+		//},
 		{
 			Name:    "reorder",
 			Aliases: []string{"r"},
 			Usage:   "Reset ids of todo (no arguments) or swap the position of two todos",
-			Action:  tdReorder,
+			Action:  cmd.TdReorder,
 		},
 		{
 			Name:    "search",
 			Aliases: []string{"s"},
 			Usage:   "Search a string in all todos",
-			Action:  tdSearch,
+			Action:  cmd.TdSearch,
 		},
 		{
 			Name:    "filter",
-			Aliases: []string{"s"},
+			Aliases: []string{"f"},
 			Usage:   "Search for todos that have upcoming deadlines",
-			Action:  tdSearchByDate,
+			Action:  cmd.TdSearchByDate,
 		},
 	}
 
@@ -88,7 +99,7 @@ func main() {
 		path := db.GetDBPath()
 
 		if path == "" {
-			WriteError("A store for your todos is missing. You have 2 possibilities:",
+			cmd.WriteError("A store for your todos is missing. You have 2 possibilities:",
 				"  1. create a \".todos\" file in your local folder.",
 				"  2. the environment variable \"TODO_DB_PATH\" could be set.",
 				"    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
