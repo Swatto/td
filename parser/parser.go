@@ -8,6 +8,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// Places the arguments to modification map.
+//
+// If there is only one argument, it will be interpreted as [todo.Todo.Desc]
+//
+// If there are more than one arguments they will be mapped based on following
+// options
+//   - -d | --desc   : Description
+//   - -D | --date   : A string that is valid according to [parser.ParseDate]
+//   - -p | --period : A string that contains the period
+//
+// Returns nil if the parsing fails at any stage
 func MapArgs(args cli.Args) (*map[string]string, error) {
 	m := make(map[string]string, 3)
 	// description case
@@ -40,6 +51,7 @@ func MapArgs(args cli.Args) (*map[string]string, error) {
 	return &m, nil
 }
 
+// Parses given string into a valid period
 func ParsePeriod(v string) (int, error) {
 	d, err := strconv.Atoi(v)
 	if err != nil {
@@ -50,6 +62,10 @@ func ParsePeriod(v string) (int, error) {
 	return d, nil
 }
 
+// Parses given string into a valid date. Allowed date formats:
+//   - dd/MM/yyyy
+//   - dd/MM/yyyy HH:mm
+//   - HH:mm
 func ParseDate(v string) (time.Time, error) {
 	if len(v) == 0 {
 		return time.Time{}, nil

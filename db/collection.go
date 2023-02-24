@@ -3,32 +3,26 @@ package db
 import (
 	"errors"
 	"regexp"
-	"strconv"
 	"time"
 	"umutsevdi/td/parser"
 	"umutsevdi/td/todo"
 )
 
+// Group of [todo.Todo]
 type Collection struct {
-	Todos []*todo.Todo
-	m     map[int]int
+	Todos []*todo.Todo // underlying array
+	m     map[int]int  // id - array index map
 }
 
+// STATUS is an enum for todo statuses
 type STATUS string
 
 const (
 	STATUS_PENDING = STATUS("pending")
 	STATUS_EXPIRED = STATUS("expired")
 	STATUS_DONE    = STATUS("done")
+	NOT_FOUND      = "todo with the given id was not found."
 )
-
-func (c *Collection) FetchMap() {
-	m := make(map[int]int, 2*len(c.Todos))
-	for k, v := range c.Todos {
-		m[v.ID] = k
-	}
-	c.m = m
-}
 
 func (c *Collection) deleteByIndex(item int) {
 	s := *c
@@ -37,6 +31,21 @@ func (c *Collection) deleteByIndex(item int) {
 	*c = s
 }
 
+// Fetches the internal map to update the cache.
+//
+// Use after modifying the array directly without the existing functions.
+// Built-in functions such as [*Collection.Add] or [Remove] does not require,
+// they update the map internally.
+func (c *Collection) FetchMap() {
+	m := make(map[int]int, 2*len(c.Todos))
+	for k, v := range c.Todos {
+		m[v.ID] = k
+	}
+	c.m = m
+}
+
+// Get index of the element in the array. If the element does not exist returns
+// -1 instead.
 func (c *Collection) GetIndex(id int) int {
 	t, ok := c.m[id]
 	if !ok {
@@ -45,6 +54,7 @@ func (c *Collection) GetIndex(id int) int {
 	return t
 }
 
+// Returns whether an item with given id exists or not.
 func (c *Collection) Has(id int) bool {
 	if ix := c.GetIndex(id); ix != -1 {
 		return c.Todos[ix] != nil
@@ -52,13 +62,22 @@ func (c *Collection) Has(id int) bool {
 	return false
 }
 
+// Returns a pointer to the element with given id. An error is returned when the
+// item is not found.
 func (c *Collection) Find(id int) (*todo.Todo, error) {
 	if ix := c.GetIndex(id); ix != -1 {
 		return c.Todos[ix], nil
 	}
-	return nil, errors.New("The todo with the id " + strconv.FormatInt(int64(id), 10) + " was not found.")
+	return nil, errors.New(NOT_FOUND)
 }
 
+// Filters the collection by the STATUS.
+//
+//   - STATUS_DONE    : List of items that are done.
+//   - STATUS_PENDING : List of items that haven't been completed and their
+//
+// deadline hasn't arrived or doesn't exist.
+//   - STATUS_EXPIRED : List of items that haven't been completed in given time.
 func (c *Collection) List(status STATUS) {
 	if status == STATUS_DONE {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
@@ -82,6 +101,7 @@ func (c *Collection) List(status STATUS) {
 	}
 }
 
+// Creates a new [todo.Todo] with given values and adds to the collection.
 func (c *Collection) Add(desc string, d time.Time, p int) *todo.Todo {
 	newTodo := &todo.Todo{
 		Desc:     desc,
@@ -103,6 +123,14 @@ func (c *Collection) Add(desc string, d time.Time, p int) *todo.Todo {
 	return newTodo
 }
 
+// Modifies the item with given index based on given map, returns the address of
+// the updated todo.
+// Modification map may have following values:
+//   - desc   : Description
+//   - date   : A string that is valid according to [parser.ParseDate]
+//   - period : A string that contains the period
+//
+// Any other string is ignored.
 func (c *Collection) Modify(id int, m *map[string]string) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 	if err != nil {
@@ -121,6 +149,12 @@ func (c *Collection) Modify(id int, m *map[string]string) (*todo.Todo, error) {
 	return todo, nil
 }
 
+// Toggles given todo task as done.
+//
+// If the given task is:
+//   - STATUS_DONE    it becomes STATUS_PENDING.
+//   - STATUS_PENDING and it has no period it becomes STATUS_DONE.
+//   - STATUS_PENDING and it has period, the period is reduced by one.
 func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 	if err != nil {
@@ -129,10 +163,6 @@ func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	if todo.Period > 0 {
 		todo.Period--
 		todo.Modified = time.Now().Local().String()
-		if err != nil {
-			err = errors.New("todos couldn't be saved")
-			return todo, err
-		}
 		return todo, nil
 	}
 
@@ -145,15 +175,17 @@ func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	return todo, err
 }
 
+// Removes the item with given id from the collection.
 func (c *Collection) Remove(id int) error {
 	index := c.GetIndex(id)
 	if index == -1 {
-		return errors.New("The todo with the id " + strconv.Itoa(id) + "was not found.")
+		return errors.New(NOT_FOUND)
 	}
 	c.deleteByIndex(index)
 	return nil
 }
 
+// Updates the ids of all elements in the collection.
 func (c *Collection) Reorder() {
 	for i, todo := range c.Todos {
 		todo.ID = i + 1
@@ -161,9 +193,10 @@ func (c *Collection) Reorder() {
 	c.FetchMap()
 }
 
+// Swaps the positions of the items with given ids.
 func (c *Collection) Swap(idA int, idB int) error {
 	if !c.Has(idA) || !c.Has(idB) {
-		return errors.New("No such todo")
+		return errors.New(NOT_FOUND)
 	}
 
 	indexA := c.GetIndex(idA)
@@ -174,6 +207,7 @@ func (c *Collection) Swap(idA int, idB int) error {
 	return nil
 }
 
+// Searches a text pattern in todos
 func (c *Collection) Search(sentence string) {
 	sentence = regexp.QuoteMeta(sentence)
 	re := regexp.MustCompile("(?i)" + sentence)
@@ -184,11 +218,11 @@ func (c *Collection) Search(sentence string) {
 	}
 }
 
+// Returns todos with deadlines before the given date
 func (c *Collection) FilterByDate(date time.Time) {
 	for i, v := range c.Todos {
 		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
 			c.deleteByIndex(i)
 		}
 	}
-
 }

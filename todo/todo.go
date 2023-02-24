@@ -1,3 +1,6 @@
+/*
+This package contains todo items and their functions
+*/
 package todo
 
 import (
@@ -11,6 +14,7 @@ import (
 	"umutsevdi/td/printer"
 )
 
+// Data struct for a single todo
 type Todo struct {
 	ID       int       `json:"id"`
 	Desc     string    `json:"desc"`
@@ -21,6 +25,7 @@ type Todo struct {
 	Created  time.Time `json:"created"`
 }
 
+// Prints the todo to screen
 func (t *Todo) MakeOutput(useColor bool) {
 	var symbole string
 	var color ct.Color

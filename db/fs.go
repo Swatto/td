@@ -26,6 +26,7 @@ func CreateStoreFileIfNeeded(path string) error {
 	return nil
 }
 
+// Reads the StoreFile and returns a collection filled with [todo.Todo]
 func Read() (*Collection, error) {
 	c := Collection{}
 	file, err := os.OpenFile(GetDBPath(), os.O_RDONLY, 0600)
@@ -40,6 +41,7 @@ func Read() (*Collection, error) {
 	return &c, err
 }
 
+// Saves the current state of the collection
 func Save(c *Collection) error {
 	file, err := os.OpenFile(GetDBPath(), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
