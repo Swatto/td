@@ -12,7 +12,7 @@ import (
 )
 
 type Todo struct {
-	ID       int64     `json:"id"`
+	ID       int       `json:"id"`
 	Desc     string    `json:"desc"`
 	Status   string    `json:"status"`
 	Modified string    `json:"modified"`
@@ -35,7 +35,7 @@ func (t *Todo) MakeOutput(useColor bool) {
 
 	hashtagReg := regexp.MustCompile(`#[^\\s]*`)
 
-	spaceCount := 6 - len(strconv.FormatInt(t.ID, 10))
+	spaceCount := 6 - len(strconv.FormatInt(int64(t.ID), 10))
 
 	fmt.Print(strings.Repeat(" ", spaceCount), t.ID, " | ")
 	if useColor {

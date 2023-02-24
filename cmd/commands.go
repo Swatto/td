@@ -91,7 +91,7 @@ func TdAdd(c *cli.Context) error {
 		return err
 	}
 
-	todo := collection.CreateTodo(c.Args().Get(0), dt, p)
+	todo := collection.Add(c.Args().Get(0), dt, p)
 
 	ct.ChangeColor(ct.Blue, false, ct.None, false)
 	if !dt.IsZero() {
@@ -120,7 +120,7 @@ func TdModify(c *cli.Context) error {
 	}
 	args := c.Args()
 
-	id, err := strconv.ParseInt(args.Get(0), 10, 32)
+	id, err := strconv.Atoi(args.Get(0))
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
@@ -136,7 +136,7 @@ func TdModify(c *cli.Context) error {
 		WriteError(err.Error())
 		return err
 	}
-	Td, err := collection.ModifyTodo(id, m)
+	Td, err := collection.Modify(id, m)
 	if err != nil {
 		WriteError(err.Error())
 		return err
@@ -167,7 +167,7 @@ func TdToggle(c *cli.Context) error {
 		return err
 	}
 
-	id, err := strconv.ParseInt(c.Args().Get(0), 10, 32)
+	id, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
 		WriteError(err.Error())
 		return err
@@ -198,7 +198,7 @@ func TdRemove(c *cli.Context) error {
 		return argError
 	}
 
-	id, err := strconv.ParseInt(c.Args().Get(0), 10, 32)
+	id, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -228,17 +228,42 @@ func TdReorder(c *cli.Context) error {
 		return err
 	}
 
+	if c.Args().Len() != 0 {
+		WriteError("Reorder takes no arguments.")
+		return argError
+	}
+
+	collection.Reorder()
+	err = db.Save(collection)
+	if err != nil {
+		WriteError(err.Error())
+		return err
+	}
+
+	ct.ChangeColor(ct.Cyan, false, ct.None, false)
+	fmt.Println("Your list is now reordered.")
+	ct.ResetColor()
+	return nil
+}
+
+func TdSwap(c *cli.Context) error {
+	collection, err := db.Read()
+	if err != nil {
+		WriteError(err.Error())
+		return err
+	}
+
 	if c.Args().Len() != 1 {
 		WriteError("You must provide two position if you want to swap todos.",
-			"Example: Td reorder 9 3")
+			"Example: Td swap 9 3")
 		return argError
 	} else if c.Args().Len() != 2 {
-		idA, err := strconv.ParseInt(c.Args().Get(0), 10, 32)
+		idA, err := strconv.Atoi(c.Args().Get(0))
 		if err != nil {
 			WriteError(err.Error())
 			return err
 		}
-		idB, err := strconv.ParseInt(c.Args().Get(1), 10, 32)
+		idB, err := strconv.Atoi(c.Args().Get(1))
 		if err != nil {
 			WriteError(err.Error())
 			return err
@@ -253,16 +278,11 @@ func TdReorder(c *cli.Context) error {
 		ct.ResetColor()
 	}
 
-	collection.Reorder()
 	err = db.Save(collection)
 	if err != nil {
 		WriteError(err.Error())
 		return err
 	}
-
-	ct.ChangeColor(ct.Cyan, false, ct.None, false)
-	fmt.Println("Your list is now reordered.")
-	ct.ResetColor()
 	return nil
 }
 func TdSearch(c *cli.Context) error {

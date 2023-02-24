@@ -77,12 +77,18 @@ func main() {
 		{
 			Name:    "reorder",
 			Aliases: []string{"r"},
-			Usage:   "Reset ids of todo (no arguments) or swap the position of two todos",
+			Usage:   "Reset ids of todo",
 			Action:  cmd.TdReorder,
 		},
 		{
-			Name:    "search",
+			Name:    "swap",
 			Aliases: []string{"s"},
+			Usage:   "swap the position of two todos",
+			Action:  cmd.TdSwap,
+		},
+		{
+			Name:    "search",
+			Aliases: []string{"S"},
 			Usage:   "Search a string in all todos",
 			Action:  cmd.TdSearch,
 		},

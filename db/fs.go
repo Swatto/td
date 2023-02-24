@@ -36,6 +36,7 @@ func Read() (*Collection, error) {
 	defer file.Close()
 
 	err = json.NewDecoder(file).Decode(&c.Todos)
+	c.FetchMap()
 	return &c, err
 }
 

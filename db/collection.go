@@ -11,6 +11,7 @@ import (
 
 type Collection struct {
 	Todos []*todo.Todo
+	m     map[int]int
 }
 
 type STATUS string
@@ -21,69 +22,75 @@ const (
 	STATUS_DONE    = STATUS("done")
 )
 
-func (c *Collection) RemoveAtIndex(item int) {
+func (c *Collection) FetchMap() {
+	m := make(map[int]int, 2*len(c.Todos))
+	for k, v := range c.Todos {
+		m[v.ID] = k
+	}
+	c.m = m
+}
+
+func (c *Collection) deleteByIndex(item int) {
 	s := *c
 	s.Todos = append(s.Todos[:item], s.Todos[item+1:]...)
+	delete(c.m, c.Todos[item].ID)
 	*c = s
 }
 
+func (c *Collection) GetIndex(id int) int {
+	t, ok := c.m[id]
+	if !ok {
+		return -1
+	}
+	return t
+}
+
 func (c *Collection) Has(id int) bool {
-	if id >= 0 && id <= int(c.Todos[len(c.Todos)-1].ID) {
-		for _, todo := range c.Todos {
-			if id == int(todo.ID) {
-				return true
-			}
-		}
+	if ix := c.GetIndex(id); ix != -1 {
+		return c.Todos[ix] != nil
 	}
 	return false
 }
 
-func (c *Collection) Find(id int64) (*todo.Todo, error) {
-	for _, todo := range c.Todos {
-		if id == todo.ID {
-			return todo, nil
-		}
+func (c *Collection) Find(id int) (*todo.Todo, error) {
+	if ix := c.GetIndex(id); ix != -1 {
+		return c.Todos[ix], nil
 	}
-	return nil, errors.New("The todo with the id " + strconv.FormatInt(id, 10) + " was not found.")
+	return nil, errors.New("The todo with the id " + strconv.FormatInt(int64(id), 10) + " was not found.")
 }
 
 func (c *Collection) List(status STATUS) {
-	// if STATUS_EXPIRED check_date
-	// if STATUS_PENDING check_date && check_not_done
-	// if STATUS_DONE check_done
 	if status == STATUS_DONE {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
 			if c.Todos[i].Status != string(STATUS_DONE) {
-				c.RemoveAtIndex(i)
+				c.deleteByIndex(i)
 			}
 		}
 	} else if status == STATUS_EXPIRED {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
 			if c.Todos[i].Deadline.IsZero() || c.Todos[i].Deadline.After(time.Now()) {
-				c.RemoveAtIndex(i)
+				c.deleteByIndex(i)
 			}
 		}
 	} else {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
 			if c.Todos[i].Status != string(STATUS_PENDING) ||
 				(!c.Todos[i].Deadline.IsZero() && c.Todos[i].Deadline.Before(time.Now())) {
-				c.RemoveAtIndex(i)
+				c.deleteByIndex(i)
 			}
 		}
 	}
 }
 
-func (c *Collection) CreateTodo(desc string, d time.Time, p int) *todo.Todo {
+func (c *Collection) Add(desc string, d time.Time, p int) *todo.Todo {
 	newTodo := &todo.Todo{
-		ID:       0,
 		Desc:     desc,
-		Status:   "pending",
-		Modified: "",
+		Status:   string(STATUS_PENDING),
 		Deadline: d,
 		Period:   p,
 		Created:  time.Now(),
 	}
-	var highestID int64 = 0
+	var highestID int = 0
 	for _, todo := range c.Todos {
 		if todo.ID > highestID {
 			highestID = todo.ID
@@ -92,10 +99,11 @@ func (c *Collection) CreateTodo(desc string, d time.Time, p int) *todo.Todo {
 	newTodo.ID = (highestID + 1)
 	newTodo.Modified = time.Now().Local().String()
 	c.Todos = append(c.Todos, newTodo)
+	c.m[newTodo.ID] = len(c.Todos) - 1
 	return newTodo
 }
 
-func (c *Collection) ModifyTodo(id int64, m *map[string]string) (*todo.Todo, error) {
+func (c *Collection) Modify(id int, m *map[string]string) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 	if err != nil {
 		return nil, err
@@ -109,11 +117,11 @@ func (c *Collection) ModifyTodo(id int64, m *map[string]string) (*todo.Todo, err
 	if _, ok := (*m)["period"]; ok {
 		todo.Period, _ = parser.ParsePeriod((*m)["period"])
 	}
-    todo.Modified=time.Now().Local().String()
+	todo.Modified = time.Now().Local().String()
 	return todo, nil
 }
 
-func (c *Collection) Toggle(id int64) (*todo.Todo, error) {
+func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	todo, err := c.Find(id)
 	if err != nil {
 		return todo, err
@@ -128,55 +136,42 @@ func (c *Collection) Toggle(id int64) (*todo.Todo, error) {
 		return todo, nil
 	}
 
-	if todo.Status == "done" {
-		todo.Status = "pending"
+	if todo.Status == string(STATUS_DONE) {
+		todo.Status = string(STATUS_PENDING)
 	} else {
-		todo.Status = "done"
+		todo.Status = string(STATUS_DONE)
 	}
 	todo.Modified = time.Now().Local().String()
 	return todo, err
 }
 
 func (c *Collection) Remove(id int) error {
-	if !c.Has(id) {
+	index := c.GetIndex(id)
+	if index == -1 {
 		return errors.New("The todo with the id " + strconv.Itoa(id) + "was not found.")
 	}
-	c.RemoveAtIndex(id)
+	c.deleteByIndex(index)
 	return nil
 }
 
 func (c *Collection) Reorder() {
 	for i, todo := range c.Todos {
-		todo.ID = int64(i + 1)
+		todo.ID = i + 1
 	}
+	c.FetchMap()
 }
 
-func (c *Collection) Swap(idA int64, idB int64) error {
-	_, err := c.Find(idA)
-	if err != nil {
-		return err
+func (c *Collection) Swap(idA int, idB int) error {
+	if !c.Has(idA) || !c.Has(idB) {
+		return errors.New("No such todo")
 	}
 
-	_, err = c.Find(idB)
-	if err != nil {
-		return err
-	}
+	indexA := c.GetIndex(idA)
+	indexB := c.GetIndex(idB)
 
-	var positionA int
-	var positionB int
-
-	for i, todo := range c.Todos {
-		switch todo.ID {
-		case idA:
-			positionA = i
-			todo.ID = idB
-		case idB:
-			positionB = i
-			todo.ID = idA
-		}
-	}
-	c.Todos[positionA], c.Todos[positionB] = c.Todos[positionB], c.Todos[positionA]
-	return err
+	c.m[c.Todos[indexA].ID], c.m[c.Todos[indexB].ID] = indexB, indexA
+	c.Todos[indexA], c.Todos[indexB] = c.Todos[indexB], c.Todos[indexA]
+	return nil
 }
 
 func (c *Collection) Search(sentence string) {
@@ -184,7 +179,7 @@ func (c *Collection) Search(sentence string) {
 	re := regexp.MustCompile("(?i)" + sentence)
 	for i := len(c.Todos) - 1; i >= 0; i-- {
 		if !re.MatchString(c.Todos[i].Desc) {
-			c.RemoveAtIndex(i)
+			c.deleteByIndex(i)
 		}
 	}
 }
@@ -192,7 +187,7 @@ func (c *Collection) Search(sentence string) {
 func (c *Collection) FilterByDate(date time.Time) {
 	for i, v := range c.Todos {
 		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
-			c.RemoveAtIndex(i)
+			c.deleteByIndex(i)
 		}
 	}
 
