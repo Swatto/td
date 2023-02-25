@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 	"time"
-	"umutsevdi/td/todo"
+	"github.com/swatto/td/todo"
 )
 
 func _TestCollectionIds() []int {

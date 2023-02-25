@@ -28,24 +28,28 @@ USAGE:
    td [global options] command [command options] [arguments...]
 
 VERSION:
-   1.4.1
+   1.5
 
-AUTHOR:
-  Gaël Gillard - <gael@gaelgillard.com>
+AUTHORS:
+   Gaël Gillard <gillardgael@gmail.com>
+   Umut Sevdi <sevdiumut@gmail.com>
 
 COMMANDS:
-   init, i  Initialize a collection of todos
-   add, a   Add a new todo
-   modify, m   Modify the text of an existing todo
+   init, i     Initialize a collection of todos
+   add, a      Add a new todo
+   modify, m   Modify the text or any property of an existing todo
    toggle, t   Toggle the status of a todo by giving his id
-   clean Remove finished todos from the list
-   reorder, r  Reset ids of todo or swap the position of two todo
-   search, s   Search a string in all todos
-   help, h  Shows a list of commands or help for one command
+   delete, d   Remove an existing todo
+   reorder, r  Reset ids of todo
+   swap, s     swap the position of two todos
+   search, S   Search a string in all todos
+   filter, f   Search for todos that have upcoming deadlines
+   help, h     Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --done, -d     print done todos
-   --all, -a      print all todos
-   --help, -h     show help
-   --version, -v  print the version
+   --past         print todos that are past due (default: false)
+   --done         print done todos (default: false)
+   --all          print all todos (default: false)
+   --help, -h     show help (default: false)
+   --version, -v  print the version (default: false)
 ```

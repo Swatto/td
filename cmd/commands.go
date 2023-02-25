@@ -6,12 +6,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/swatto/td/db"
+	"github.com/swatto/td/parser"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-	"umutsevdi/td/db"
-	"umutsevdi/td/parser"
 
 	ct "github.com/daviddengcn/go-colortext"
 	cli "github.com/urfave/cli/v2"

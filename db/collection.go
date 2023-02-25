@@ -2,10 +2,10 @@ package db
 
 import (
 	"errors"
+	"github.com/swatto/td/parser"
+	"github.com/swatto/td/todo"
 	"regexp"
 	"time"
-	"umutsevdi/td/parser"
-	"umutsevdi/td/todo"
 )
 
 // Group of [todo.Todo]

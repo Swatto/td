@@ -3,8 +3,8 @@ package main
 import (
 	cli "github.com/urfave/cli/v2"
 	"os"
-	"umutsevdi/td/cmd"
-	"umutsevdi/td/db"
+	"github.com/swatto/td/cmd"
+	"github.com/swatto/td/db"
 )
 
 func main() {

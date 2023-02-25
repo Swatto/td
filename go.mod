@@ -1,4 +1,4 @@
-module umutsevdi/td
+module github.com/swatto/td
 
 go 1.16
 

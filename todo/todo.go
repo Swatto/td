@@ -11,7 +11,7 @@ import (
 	"time"
 
 	ct "github.com/daviddengcn/go-colortext"
-	"umutsevdi/td/printer"
+	"github.com/swatto/td/printer"
 )
 
 // Data struct for a single todo
