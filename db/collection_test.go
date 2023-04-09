@@ -1,9 +1,9 @@
 package db
 
 import (
+	"github.com/swatto/td/todo"
 	"testing"
 	"time"
-	"github.com/swatto/td/todo"
 )
 
 func _TestCollectionIds() []int {
@@ -16,21 +16,21 @@ func _TestMakeCollection() Collection {
 			ID:       0,
 			Status:   "pending",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now().AddDate(0, -1, 0).Local().String(),
+			Modified: time.Now().AddDate(0, -1, 0),
 		},
 		// no deadline done
 		{
 			ID:       1,
 			Status:   "done",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now().AddDate(0, -1, 0).Local().String(),
+			Modified: time.Now().AddDate(0, 0, -1),
 		},
 		// deadline pending not-expired
 		{
 			ID:       2,
 			Status:   "pending",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now().AddDate(0, -1, 0).Local().String(),
+			Modified: time.Now().AddDate(0, -1, 0),
 			Deadline: time.Now().AddDate(0, 1, 0),
 		},
 		// deadline done not-expired
@@ -38,7 +38,7 @@ func _TestMakeCollection() Collection {
 			ID:       4,
 			Status:   "done",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now().AddDate(0, -1, 0).Local().String(),
+			Modified: time.Now().AddDate(0, -1, 0),
 			Deadline: time.Now().AddDate(0, 1, 0),
 		},
 		// deadline pending expired
@@ -46,7 +46,7 @@ func _TestMakeCollection() Collection {
 			ID:       5,
 			Status:   "pending",
 			Created:  time.Now(),
-			Modified: time.Now().Local().String(),
+			Modified: time.Now(),
 			Deadline: time.Now().AddDate(0, -1, 0),
 		},
 		// deadline done expired
@@ -54,8 +54,8 @@ func _TestMakeCollection() Collection {
 			ID:       6,
 			Status:   "done",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now().AddDate(0, -1, 0).Local().String(),
-			Deadline: time.Now().AddDate(0, -1, 0),
+			Modified: time.Now(),
+			Deadline: time.Now(),
 		},
 	}}
 	c.FetchMap()
@@ -117,10 +117,10 @@ func TestFind(t *testing.T) {
 
 func TestList(t *testing.T) {
 	c := _TestMakeCollection()
-	c.List(STATUS_DONE)
-	if len(c.Todos) != 3 {
+	c.List(STATUS_DONE, true)
+	if len(c.Todos) != 2 {
 		t.Fail()
-		t.Log("STATUS_DONE should be 3")
+		t.Log("STATUS_DONE should be 2")
 	} else {
 		for _, v := range c.Todos {
 			if v.Status != string(STATUS_DONE) {
@@ -131,17 +131,17 @@ func TestList(t *testing.T) {
 	}
 
 	c = _TestMakeCollection()
-	c.List(STATUS_EXPIRED)
-	if len(c.Todos) != 2 {
+	c.List(STATUS_EXPIRED, true)
+	if len(c.Todos) != 3 {
 		t.Fail()
-		t.Log("STATUS_EXPIRED should be 2")
+		t.Log("STATUS_EXPIRED should be 3 but is ", len(c.Todos))
 	}
 
 	c = _TestMakeCollection()
-	c.List(STATUS_PENDING)
+	c.List(STATUS_PENDING, false)
 	if len(c.Todos) != 2 {
 		t.Fail()
-		t.Log("STATUS_PENDING should be 2")
+		t.Log("STATUS_PENDING should be 2 but is ", len(c.Todos))
 	} else {
 		for _, v := range c.Todos {
 			if v.Status != string(STATUS_PENDING) {

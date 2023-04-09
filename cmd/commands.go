@@ -58,18 +58,20 @@ func Write(m MessageType, v ...string) {
 	ct.ResetColor()
 }
 
+// Lists all todo items
 func TdList(c *cli.Context) error {
+	isRecent := c.Bool("recent")
 	collection, err := db.Read()
 	if err != nil {
 		Write(MT_ERROR, err.Error())
 	} else {
 		if !c.IsSet("all") {
 			if c.IsSet("done") {
-				collection.List(db.STATUS_DONE)
+				collection.List(db.STATUS_DONE, isRecent)
 			} else if c.IsSet("past") {
-				collection.List(db.STATUS_EXPIRED)
+				collection.List(db.STATUS_EXPIRED, isRecent)
 			} else {
-				collection.List(db.STATUS_PENDING)
+				collection.List(db.STATUS_PENDING, false)
 			}
 		}
 
@@ -145,9 +147,9 @@ func TdAdd(c *cli.Context) error {
 //
 // If there is only one argument, it will be interpreted as [todo.Todo.Desc]
 // If there are more than one arguments they will be mapped based on following options:
-//   - \-d | --desc   : Description
-//   - \-D | --date   : A string that is valid according to [parser.ParseDate]
-//   - \-p | --period : A string that contains the period
+//   - \-d | desc   : Description
+//   - \-D | date   : A string that is valid according to [parser.ParseDate]
+//   - \-p | period : A string that contains the period
 func TdModify(c *cli.Context) error {
 	if c.Args().Len() < 2 {
 		Write(MT_ERROR, "\n", "You must provide the id and the new text for your todo.",
@@ -161,7 +163,6 @@ func TdModify(c *cli.Context) error {
 		Write(MT_ERROR, err.Error())
 		return err
 	}
-
 	collection, err := db.Read()
 	if err != nil {
 		Write(MT_ERROR, err.Error())
@@ -228,7 +229,7 @@ func TdRemove(c *cli.Context) error {
 
 	if c.Args().Len() != 1 {
 		Write(MT_ERROR, "\n", "You must provide the position of the item you want to remove.",
-			"Example: Td --remove 1")
+			"Example: Td remove 1")
 		return argError
 	}
 
@@ -285,31 +286,30 @@ func TdSwap(c *cli.Context) error {
 		return err
 	}
 
-	if c.Args().Len() != 1 {
+	if c.Args().Len() != 2 {
 		Write(MT_ERROR, "\n", "You must provide two position if you want to swap todos.",
 			"Example: Td swap 9 3")
 		return argError
-	} else if c.Args().Len() != 2 {
-		idA, err := strconv.Atoi(c.Args().Get(0))
-		if err != nil {
-			Write(MT_ERROR, err.Error())
-			return err
-		}
-		idB, err := strconv.Atoi(c.Args().Get(1))
-		if err != nil {
-			Write(MT_ERROR, err.Error())
-			return err
-		}
-		err = collection.Swap(idA, idB)
-		if err != nil {
-			Write(MT_ERROR, err.Error())
-			return err
-		}
-		ct.ChangeColor(ct.Cyan, false, ct.None, false)
-
-		Write(MT_UPDATE, c.Args().Get(0), "and", c.Args().Get(1), "has been swapped.")
-		ct.ResetColor()
 	}
+	idA, err := strconv.Atoi(c.Args().Get(0))
+	if err != nil {
+		Write(MT_ERROR, err.Error())
+		return err
+	}
+	idB, err := strconv.Atoi(c.Args().Get(1))
+	if err != nil {
+		Write(MT_ERROR, err.Error())
+		return err
+	}
+	err = collection.Swap(idA, idB)
+	if err != nil {
+		Write(MT_ERROR, err.Error())
+		return err
+	}
+	ct.ChangeColor(ct.Cyan, false, ct.None, false)
+
+	Write(MT_UPDATE, c.Args().Get(0), "and", c.Args().Get(1), "has been swapped.")
+	ct.ResetColor()
 
 	err = db.Save(collection)
 	if err != nil {

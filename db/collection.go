@@ -18,6 +18,7 @@ type Collection struct {
 type STATUS string
 
 const (
+	RECENT_DATE    = 10
 	STATUS_PENDING = STATUS("pending")
 	STATUS_EXPIRED = STATUS("expired")
 	STATUS_DONE    = STATUS("done")
@@ -71,14 +72,14 @@ func (c *Collection) Find(id int) (*todo.Todo, error) {
 	return nil, errors.New(NOT_FOUND)
 }
 
-// Filters the collection by the STATUS.
+// Filters the collection by the STATUS. Optionally can filter items to last 15 days.
 //
 //   - STATUS_DONE    : List of items that are done.
 //   - STATUS_PENDING : List of items that haven't been completed and their
 //
 // deadline hasn't arrived or doesn't exist.
 //   - STATUS_EXPIRED : List of items that haven't been completed in given time.
-func (c *Collection) List(status STATUS) {
+func (c *Collection) List(status STATUS, isRecent bool) {
 	if status == STATUS_DONE {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
 			if c.Todos[i].Status != string(STATUS_DONE) {
@@ -87,7 +88,7 @@ func (c *Collection) List(status STATUS) {
 		}
 	} else if status == STATUS_EXPIRED {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
-			if c.Todos[i].Deadline.IsZero() || c.Todos[i].Deadline.After(time.Now()) {
+			if !c.Todos[i].Deadline.IsZero() && c.Todos[i].Deadline.After(time.Now()) {
 				c.deleteByIndex(i)
 			}
 		}
@@ -97,6 +98,14 @@ func (c *Collection) List(status STATUS) {
 				(!c.Todos[i].Deadline.IsZero() && c.Todos[i].Deadline.Before(time.Now())) {
 				c.deleteByIndex(i)
 			}
+		}
+	}
+	if isRecent {
+		for i := len(c.Todos) - 1; i >= 0; i-- {
+			if c.Todos[i].Modified.Before(time.Now().AddDate(0, 0, -RECENT_DATE)) {
+				c.deleteByIndex(i)
+			}
+
 		}
 	}
 }
@@ -117,7 +126,7 @@ func (c *Collection) Add(desc string, d time.Time, p int) *todo.Todo {
 		}
 	}
 	newTodo.ID = (highestID + 1)
-	newTodo.Modified = time.Now().Local().String()
+	newTodo.Modified = time.Now()
 	c.Todos = append(c.Todos, newTodo)
 	c.m[newTodo.ID] = len(c.Todos) - 1
 	return newTodo
@@ -145,7 +154,7 @@ func (c *Collection) Modify(id int, m *map[string]string) (*todo.Todo, error) {
 	if _, ok := (*m)["period"]; ok {
 		todo.Period, _ = parser.ParsePeriod((*m)["period"])
 	}
-	todo.Modified = time.Now().Local().String()
+	todo.Modified = time.Now()
 	return todo, nil
 }
 
@@ -162,7 +171,7 @@ func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	}
 	if todo.Period > 0 {
 		todo.Period--
-		todo.Modified = time.Now().Local().String()
+		todo.Modified = time.Now()
 		return todo, nil
 	}
 
@@ -171,7 +180,7 @@ func (c *Collection) Toggle(id int) (*todo.Todo, error) {
 	} else {
 		todo.Status = string(STATUS_DONE)
 	}
-	todo.Modified = time.Now().Local().String()
+	todo.Modified = time.Now()
 	return todo, err
 }
 

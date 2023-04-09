@@ -6,8 +6,6 @@ package todo
 import (
 	"fmt"
 	"regexp"
-	"strconv"
-	"strings"
 	"time"
 
 	ct "github.com/daviddengcn/go-colortext"
@@ -19,7 +17,7 @@ type Todo struct {
 	ID       int       `json:"id"`
 	Desc     string    `json:"desc"`
 	Status   string    `json:"status"`
-	Modified string    `json:"modified"`
+	Modified time.Time `json:"modified"`
 	Period   int       `json:"period"`
 	Deadline time.Time `json:"deadline"`
 	Created  time.Time `json:"created"`
@@ -40,9 +38,7 @@ func (t *Todo) MakeOutput(useColor bool) {
 
 	hashtagReg := regexp.MustCompile(`#[^\\s]*`)
 
-	spaceCount := 6 - len(strconv.FormatInt(int64(t.ID), 10))
-
-	fmt.Print(strings.Repeat(" ", spaceCount), t.ID, " | ")
+	fmt.Printf("%02d | ", t.ID)
 	if useColor {
 		ct.ChangeColor(color, false, ct.None, false)
 	}
@@ -65,7 +61,13 @@ func (t *Todo) MakeOutput(useColor bool) {
 	}
 	fmt.Printf("%-25s", t.Desc[pos:])
 	if !t.Deadline.IsZero() {
-		fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan 15:04"))
+		if (t.Deadline.Minute() == 59 && t.Deadline.Hour() == 23) ||
+			(t.Deadline.Minute() == 0 && t.Deadline.Hour() == 0) {
+			fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan"))
+		} else {
+
+			fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan 15:04"))
+		}
 	}
 	if t.Period != 0 {
 		fmt.Print(printer.PeriodSign, t.Period)

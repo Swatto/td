@@ -1,10 +1,10 @@
 package main
 
 import (
-	cli "github.com/urfave/cli/v2"
-	"os"
 	"github.com/swatto/td/cmd"
 	"github.com/swatto/td/db"
+	cli "github.com/urfave/cli/v2"
+	"os"
 )
 
 func main() {
@@ -24,16 +24,21 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		&cli.BoolFlag{
-			Name:  "past, p",
+			Name:  "past",
 			Usage: "print todos that are past due",
 		},
 		&cli.BoolFlag{
-			Name:  "done, d",
+			Name:  "done",
 			Usage: "print done todos",
 		},
 		&cli.BoolFlag{
-			Name:  "all, a",
+			Name:  "all",
 			Usage: "print all todos",
+		},
+		&cli.BoolFlag{
+			Name:  "recent",
+			Usage: "print todos within the week",
+			Value: true,
 		},
 	}
 	app.Action = cmd.TdList
