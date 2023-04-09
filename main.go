@@ -37,7 +37,7 @@ func main() {
 		},
 		&cli.BoolFlag{
 			Name:  "recent",
-			Usage: "print todos within the week",
+            Usage: "print recent todos, can be combined with the rest of options\nExample: td --past --recent=false",
 			Value: true,
 		},
 	}
