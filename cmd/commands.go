@@ -39,23 +39,27 @@ func (e Error) Error() string { return string(e) }
 //   - "\t"
 //   - ", "
 //   - ","
-func Write(m MessageType, v ...string) {
+func Write(c *cli.Context, m MessageType, v ...string) {
 	join := " "
 	if v[0] == "" || v[0] == "\n" || v[0] == "\t" || v[0] == ", " || v[0] == "," {
 		join = v[0]
 	}
-	switch m {
-	case MT_UPDATE:
-		ct.ChangeColor(ct.Blue, false, ct.None, false)
-	case MT_INFO:
-		ct.ChangeColor(ct.Cyan, false, ct.None, false)
-	case MT_ERROR:
-		ct.ChangeColor(ct.Red, false, ct.None, false)
-		fmt.Print("Error: ")
-		ct.ResetColor()
+	if c.Bool("color") {
+		switch m {
+		case MT_UPDATE:
+			ct.ChangeColor(ct.Blue, false, ct.None, false)
+		case MT_INFO:
+			ct.ChangeColor(ct.Cyan, false, ct.None, false)
+		case MT_ERROR:
+			ct.ChangeColor(ct.Red, false, ct.None, false)
+			fmt.Print("Error: ")
+			ct.ResetColor()
+		}
 	}
 	fmt.Println(strings.Join(v, join))
-	ct.ResetColor()
+	if c.Bool("color") {
+		ct.ResetColor()
+	}
 }
 
 // Lists all todo items
@@ -63,7 +67,7 @@ func TdList(c *cli.Context) error {
 	isRecent := c.Bool("recent")
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 	} else {
 		if !c.IsSet("all") {
 			if c.IsSet("done") {
@@ -80,7 +84,7 @@ func TdList(c *cli.Context) error {
 				todo.MakeOutput(c.Bool("color"))
 			}
 		} else {
-			Write(MT_INFO, "There is no todo to show.")
+			Write(c, MT_INFO, "There is no todo to show.")
 		}
 	}
 	return nil
@@ -97,9 +101,9 @@ func TdInit(c *cli.Context) error {
 	err = db.CreateStoreFileIfNeeded(cwd + "/.todos")
 	ct.ChangeColor(ct.Cyan, false, ct.None, false)
 	if err != nil {
-		Write(MT_INFO, "A \".todos\" file already exist in ", cwd)
+		Write(c, MT_INFO, "A \".todos\" file already exist in ", cwd)
 	} else {
-		Write(MT_UPDATE, "A \".todos\" file is now added to ", cwd)
+		Write(c, MT_UPDATE, "A \".todos\" file is now added to ", cwd)
 	}
 	ct.ResetColor()
 	return nil
@@ -108,13 +112,13 @@ func TdInit(c *cli.Context) error {
 // Add a new todo
 func TdAdd(c *cli.Context) error {
 	if c.Args().Len() == 0 {
-		Write(MT_ERROR, "\n", "You must provide a name to your todo.",
+		Write(c, MT_ERROR, "\n", "You must provide a name to your todo.",
 			"Example: Td add \"call mum\"")
 		return argError
 	}
 	dt, dtErr := parser.ParseDate(c.Args().Get(1))
 	if dtErr != nil {
-		Write(MT_ERROR, "\n", "Invalid date time format",
+		Write(c, MT_ERROR, "\n", "Invalid date time format",
 			"Available Formats: \"[dd/MM/yyyy] [hh:mm]\"")
 		return argError
 	}
@@ -122,24 +126,24 @@ func TdAdd(c *cli.Context) error {
 
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
 	todo := collection.Add(c.Args().Get(0), dt, p)
 
 	if !dt.IsZero() {
-		Write(MT_INFO, "Deadline added")
+		Write(c, MT_INFO, "Deadline added")
 	}
 	if p != 0 {
-		Write(MT_INFO, "Periodic added")
+		Write(c, MT_INFO, "Periodic added")
 	}
 	err = db.Save(collection)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	Write(MT_UPDATE, "", "\"", todo.Desc, "\" is now added to your todos at ", strconv.Itoa(todo.ID), ".")
+	Write(c, MT_UPDATE, "", "\"", todo.Desc, "\" is now added to your todos at ", strconv.Itoa(todo.ID), ".")
 	return nil
 }
 
@@ -152,7 +156,7 @@ func TdAdd(c *cli.Context) error {
 //   - \-p | period : A string that contains the period
 func TdModify(c *cli.Context) error {
 	if c.Args().Len() < 2 {
-		Write(MT_ERROR, "\n", "You must provide the id and the new text for your todo.",
+		Write(c, MT_ERROR, "\n", "You must provide the id and the new text for your todo.",
 			"Example: Td modify 2 \"call dad\"")
 		return argError
 	}
@@ -160,22 +164,22 @@ func TdModify(c *cli.Context) error {
 
 	id, err := strconv.Atoi(args.Get(0))
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	m, err := parser.MapArgs(args)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	Td, err := collection.Modify(id, m)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	err = db.Save(collection)
@@ -184,7 +188,7 @@ func TdModify(c *cli.Context) error {
 		return err
 	}
 
-	Write(MT_UPDATE, args.Get(0), " has been updated:")
+	Write(c, MT_UPDATE, args.Get(0), " has been updated:")
 	Td.MakeOutput(c.Bool("color"))
 	return nil
 }
@@ -192,26 +196,26 @@ func TdModify(c *cli.Context) error {
 // Toggle the status of a todo by giving his id
 func TdToggle(c *cli.Context) error {
 	if c.Args().Len() != 1 {
-		Write(MT_ERROR, "\n", "You must provide the position of the item you want to change.",
+		Write(c, MT_ERROR, "\n", "You must provide the position of the item you want to change.",
 			"Example: Td toggle 1")
 		return argError
 	}
 
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
 	id, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
 	todo, err := collection.Toggle(id)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	err = db.Save(collection)
@@ -219,7 +223,7 @@ func TdToggle(c *cli.Context) error {
 		return err
 	}
 
-	Write(MT_UPDATE, "Your todo is now ", todo.Status)
+	Write(c, MT_UPDATE, "Your todo is now ", todo.Status)
 	return nil
 }
 
@@ -228,7 +232,7 @@ func TdRemove(c *cli.Context) error {
 	var err error
 
 	if c.Args().Len() != 1 {
-		Write(MT_ERROR, "\n", "You must provide the position of the item you want to remove.",
+		Write(c, MT_ERROR, "\n", "You must provide the position of the item you want to remove.",
 			"Example: Td remove 1")
 		return argError
 	}
@@ -240,17 +244,17 @@ func TdRemove(c *cli.Context) error {
 	}
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	err = collection.Remove(int(id))
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	db.Save(collection)
 
-	Write(MT_UPDATE, "Todo at", strconv.Itoa(id), "is deleted.")
+	Write(c, MT_UPDATE, "Todo at", strconv.Itoa(id), "is deleted.")
 	return nil
 }
 
@@ -258,23 +262,23 @@ func TdRemove(c *cli.Context) error {
 func TdReorder(c *cli.Context) error {
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
 	if c.Args().Len() != 0 {
-		Write(MT_ERROR, "Reorder takes no arguments.")
+		Write(c, MT_ERROR, "Reorder takes no arguments.")
 		return argError
 	}
 
 	collection.Reorder()
 	err = db.Save(collection)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
-	Write(MT_UPDATE, "Your list is now reordered.")
+	Write(c, MT_UPDATE, "Your list is now reordered.")
 	return nil
 }
 
@@ -282,38 +286,38 @@ func TdReorder(c *cli.Context) error {
 func TdSwap(c *cli.Context) error {
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 
 	if c.Args().Len() != 2 {
-		Write(MT_ERROR, "\n", "You must provide two position if you want to swap todos.",
+		Write(c, MT_ERROR, "\n", "You must provide two position if you want to swap todos.",
 			"Example: Td swap 9 3")
 		return argError
 	}
 	idA, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	idB, err := strconv.Atoi(c.Args().Get(1))
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	err = collection.Swap(idA, idB)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	ct.ChangeColor(ct.Cyan, false, ct.None, false)
 
-	Write(MT_UPDATE, c.Args().Get(0), "and", c.Args().Get(1), "has been swapped.")
+	Write(c, MT_UPDATE, c.Args().Get(0), "and", c.Args().Get(1), "has been swapped.")
 	ct.ResetColor()
 
 	err = db.Save(collection)
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	return nil
@@ -322,20 +326,20 @@ func TdSwap(c *cli.Context) error {
 // Search a string in all todos
 func TdSearch(c *cli.Context) error {
 	if c.Args().Len() != 1 {
-		Write(MT_ERROR, "\n", "You must provide a string earch.",
+		Write(c, MT_ERROR, "\n", "You must provide a string earch.",
 			"Example: Td search \"project-1\"")
 		return argError
 	}
 
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	collection.Search(c.Args().Get(0))
 
 	if len(collection.Todos) == 0 {
-		Write(MT_INFO, "Sorry, there's no todos containing", c.Args().Get(0))
+		Write(c, MT_INFO, "Sorry, there's no todos containing", c.Args().Get(0))
 		return argError
 	}
 
@@ -344,7 +348,7 @@ func TdSearch(c *cli.Context) error {
 			todo.MakeOutput(c.Bool("color"))
 		}
 	} else {
-		Write(MT_INFO, "There's no todo to show.")
+		Write(c, MT_INFO, "There's no todo to show.")
 	}
 	return nil
 }
@@ -358,13 +362,13 @@ func TdSearchByDate(c *cli.Context) error {
 		var err error
 		date, err = parser.ParseDate(c.Args().Get(1))
 		if err != nil {
-			Write(MT_ERROR, err.Error())
+			Write(c, MT_ERROR, err.Error())
 			return argError
 		}
 	}
 	collection, err := db.Read()
 	if err != nil {
-		Write(MT_ERROR, err.Error())
+		Write(c, MT_ERROR, err.Error())
 		return err
 	}
 	for _, v := range collection.Todos {

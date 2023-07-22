@@ -109,7 +109,7 @@ func main() {
 		path := db.GetDBPath()
 
 		if path == "" {
-			cmd.Write(cmd.MT_ERROR, "\n", "A store for your todos is missing. You have 2 possibilities:",
+			cmd.Write(c, cmd.MT_ERROR, "\n", "A store for your todos is missing. You have 2 possibilities:",
 				"  1. create a \".todos\" file in your local folder.",
 				"  2. the environment variable \"TODO_DB_PATH\" could be set.",
 				"    (example: \"export TODO_DB_PATH=$HOME/Dropbox/todo.json\" in your .bashrc or .bash_profile)")
