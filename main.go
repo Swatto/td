@@ -37,7 +37,12 @@ func main() {
 		},
 		&cli.BoolFlag{
 			Name:  "recent",
-            Usage: "print recent todos, can be combined with the rest of options\nExample: td --past --recent=false",
+			Usage: "print recent todos, can be combined with the rest of options\nExample: td --past --recent=false",
+			Value: true,
+		},
+		&cli.BoolFlag{
+			Name:  "color",
+			Usage: "print with color",
 			Value: true,
 		},
 	}

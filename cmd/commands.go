@@ -77,7 +77,7 @@ func TdList(c *cli.Context) error {
 
 		if len(collection.Todos) > 0 {
 			for _, todo := range collection.Todos {
-				todo.MakeOutput(true)
+				todo.MakeOutput(c.Bool("color"))
 			}
 		} else {
 			Write(MT_INFO, "There is no todo to show.")
@@ -185,7 +185,7 @@ func TdModify(c *cli.Context) error {
 	}
 
 	Write(MT_UPDATE, args.Get(0), " has been updated:")
-	Td.MakeOutput(true)
+	Td.MakeOutput(c.Bool("color"))
 	return nil
 }
 
@@ -341,7 +341,7 @@ func TdSearch(c *cli.Context) error {
 
 	if len(collection.Todos) > 0 {
 		for _, todo := range collection.Todos {
-			todo.MakeOutput(true)
+			todo.MakeOutput(c.Bool("color"))
 		}
 	} else {
 		Write(MT_INFO, "There's no todo to show.")
@@ -369,7 +369,7 @@ func TdSearchByDate(c *cli.Context) error {
 	}
 	for _, v := range collection.Todos {
 		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
-			v.MakeOutput(true)
+			v.MakeOutput(c.Bool("color"))
 		}
 	}
 	return nil
