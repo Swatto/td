@@ -55,7 +55,7 @@ func _TestMakeCollection() Collection {
 			Status:   "done",
 			Created:  time.Now().AddDate(0, -1, 0),
 			Modified: time.Now().AddDate(0, -1, 0),
-			Deadline: time.Now(),
+			Deadline: time.Now().AddDate(0, -1, 0),
 		},
 	}}
 	c.FetchMap()
@@ -117,8 +117,7 @@ func TestFind(t *testing.T) {
 
 func TestList(t *testing.T) {
 	c := _TestMakeCollection()
-	c.List(STATUS_DONE)
-	c.FilterRecent(RECENT_DATE)
+	c.List(STATUS_DONE).FilterRecent(RECENT_DATE, STATUS_DONE)
 	if len(c.Todos) != 2 {
 		t.Fail()
 		t.Log("STATUS_DONE should be 2 but is ", len(c.Todos))
@@ -130,7 +129,6 @@ func TestList(t *testing.T) {
 			}
 		}
 	}
-
 	c = _TestMakeCollection()
 	c.List(STATUS_EXPIRED)
 	if len(c.Todos) != 2 {
@@ -139,8 +137,7 @@ func TestList(t *testing.T) {
 	}
 
 	c = _TestMakeCollection()
-	c.List(STATUS_PENDING)
-	c.FilterRecent(RECENT_DATE)
+	c.List(STATUS_PENDING).FilterRecent(RECENT_DATE, STATUS_PENDING)
 	if len(c.Todos) != 1 {
 		t.Fail()
 		t.Log("STATUS_PENDING should be 1 but is ", len(c.Todos))
