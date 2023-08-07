@@ -25,7 +25,7 @@ func _TestMakeCollection() Collection {
 			Created:  time.Now().AddDate(0, -1, 0),
 			Modified: time.Now().AddDate(0, 0, -1),
 		},
-		// deadline pending not-expired
+		// deadline pending not-expired not-recent
 		{
 			ID:       2,
 			Status:   "pending",
@@ -49,12 +49,12 @@ func _TestMakeCollection() Collection {
 			Modified: time.Now(),
 			Deadline: time.Now().AddDate(0, -1, 0),
 		},
-		// deadline done expired
+		// deadline done
 		{
 			ID:       6,
 			Status:   "done",
 			Created:  time.Now().AddDate(0, -1, 0),
-			Modified: time.Now(),
+			Modified: time.Now().AddDate(0, -1, 0),
 			Deadline: time.Now(),
 		},
 	}}
@@ -117,10 +117,11 @@ func TestFind(t *testing.T) {
 
 func TestList(t *testing.T) {
 	c := _TestMakeCollection()
-	c.List(STATUS_DONE, true)
+	c.List(STATUS_DONE)
+	c.FilterRecent(RECENT_DATE)
 	if len(c.Todos) != 2 {
 		t.Fail()
-		t.Log("STATUS_DONE should be 2")
+		t.Log("STATUS_DONE should be 2 but is ", len(c.Todos))
 	} else {
 		for _, v := range c.Todos {
 			if v.Status != string(STATUS_DONE) {
@@ -131,17 +132,18 @@ func TestList(t *testing.T) {
 	}
 
 	c = _TestMakeCollection()
-	c.List(STATUS_EXPIRED, true)
-	if len(c.Todos) != 3 {
+	c.List(STATUS_EXPIRED)
+	if len(c.Todos) != 2 {
 		t.Fail()
-		t.Log("STATUS_EXPIRED should be 3 but is ", len(c.Todos))
+		t.Log("STATUS_EXPIRED should be 2 but is ", len(c.Todos))
 	}
 
 	c = _TestMakeCollection()
-	c.List(STATUS_PENDING, false)
-	if len(c.Todos) != 2 {
+	c.List(STATUS_PENDING)
+	c.FilterRecent(RECENT_DATE)
+	if len(c.Todos) != 1 {
 		t.Fail()
-		t.Log("STATUS_PENDING should be 2 but is ", len(c.Todos))
+		t.Log("STATUS_PENDING should be 1 but is ", len(c.Todos))
 	} else {
 		for _, v := range c.Todos {
 			if v.Status != string(STATUS_PENDING) {

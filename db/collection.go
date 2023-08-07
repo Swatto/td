@@ -2,10 +2,11 @@ package db
 
 import (
 	"errors"
-	"github.com/swatto/td/parser"
-	"github.com/swatto/td/todo"
 	"regexp"
 	"time"
+
+	"github.com/swatto/td/parser"
+	"github.com/swatto/td/todo"
 )
 
 // Group of [todo.Todo]
@@ -18,7 +19,8 @@ type Collection struct {
 type STATUS string
 
 const (
-	RECENT_DATE    = 10
+	RECENT_DATE    = 14
+	STATUS_ANY     = STATUS("any")
 	STATUS_PENDING = STATUS("pending")
 	STATUS_EXPIRED = STATUS("expired")
 	STATUS_DONE    = STATUS("done")
@@ -79,7 +81,7 @@ func (c *Collection) Find(id int) (*todo.Todo, error) {
 //
 // deadline hasn't arrived or doesn't exist.
 //   - STATUS_EXPIRED : List of items that haven't been completed in given time.
-func (c *Collection) List(status STATUS, isRecent bool) {
+func (c *Collection) List(status STATUS) *Collection {
 	if status == STATUS_DONE {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
 			if c.Todos[i].Status != string(STATUS_DONE) {
@@ -88,26 +90,39 @@ func (c *Collection) List(status STATUS, isRecent bool) {
 		}
 	} else if status == STATUS_EXPIRED {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
-			if !c.Todos[i].Deadline.IsZero() && c.Todos[i].Deadline.After(time.Now()) {
+			if !c.Todos[i].IsExpired() {
 				c.deleteByIndex(i)
 			}
 		}
-	} else {
+	} else if status == STATUS_PENDING {
 		for i := len(c.Todos) - 1; i >= 0; i-- {
-			if c.Todos[i].Status != string(STATUS_PENDING) ||
-				(!c.Todos[i].Deadline.IsZero() && c.Todos[i].Deadline.Before(time.Now())) {
+			if c.Todos[i].Status != string(STATUS_PENDING) {
 				c.deleteByIndex(i)
 			}
 		}
 	}
-	if isRecent {
-		for i := len(c.Todos) - 1; i >= 0; i-- {
-			if c.Todos[i].Modified.Before(time.Now().AddDate(0, 0, -RECENT_DATE)) {
-				c.deleteByIndex(i)
-			}
+	return c
+}
 
+// Removes all items in the collection that was modified longer than given days.
+func (c *Collection) FilterRecent(day int, status STATUS) *Collection {
+	date := time.Now().AddDate(0, 0, -day)
+	for i := len(c.Todos) - 1; i >= 0; i-- {
+		rm := false
+		if c.Todos[i].Deadline.IsZero() {
+			rm = c.Todos[i].Modified.Before(date)
+		} else if status == STATUS_PENDING {
+			// pending tasks shouldn't show expired ones
+			rm = c.Todos[i].IsExpired()
+		} else {
+			rm = c.Todos[i].Deadline.Before(date)
+		}
+
+		if rm {
+			c.deleteByIndex(i)
 		}
 	}
+	return c
 }
 
 // Creates a new [todo.Todo] with given values and adds to the collection.
@@ -195,11 +210,12 @@ func (c *Collection) Remove(id int) error {
 }
 
 // Updates the ids of all elements in the collection.
-func (c *Collection) Reorder() {
+func (c *Collection) Reorder() *Collection {
 	for i, todo := range c.Todos {
 		todo.ID = i + 1
 	}
 	c.FetchMap()
+	return c
 }
 
 // Swaps the positions of the items with given ids.
@@ -217,7 +233,7 @@ func (c *Collection) Swap(idA int, idB int) error {
 }
 
 // Searches a text pattern in todos
-func (c *Collection) Search(sentence string) {
+func (c *Collection) Search(sentence string) *Collection {
 	sentence = regexp.QuoteMeta(sentence)
 	re := regexp.MustCompile("(?i)" + sentence)
 	for i := len(c.Todos) - 1; i >= 0; i-- {
@@ -225,13 +241,5 @@ func (c *Collection) Search(sentence string) {
 			c.deleteByIndex(i)
 		}
 	}
-}
-
-// Returns todos with deadlines before the given date
-func (c *Collection) FilterByDate(date time.Time) {
-	for i, v := range c.Todos {
-		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
-			c.deleteByIndex(i)
-		}
-	}
+	return c
 }

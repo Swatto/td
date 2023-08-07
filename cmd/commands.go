@@ -11,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	ct "github.com/daviddengcn/go-colortext"
 	cli "github.com/urfave/cli/v2"
@@ -64,24 +63,26 @@ func Write(c *cli.Context, m MessageType, v ...string) {
 
 // Lists all todo items
 func TdList(c *cli.Context) error {
-	isRecent := c.Bool("recent")
 	collection, err := db.Read()
 	if err != nil {
 		Write(c, MT_ERROR, err.Error())
 	} else {
-		if !c.IsSet("all") {
-			if c.IsSet("done") {
-				collection.List(db.STATUS_DONE, isRecent)
-			} else if c.IsSet("past") {
-				collection.List(db.STATUS_EXPIRED, isRecent)
-			} else {
-				collection.List(db.STATUS_PENDING, false)
-			}
+		var status db.STATUS = db.STATUS_ANY
+		if c.IsSet("done") {
+			status = db.STATUS_DONE
+		} else if c.IsSet("expired") {
+			status = db.STATUS_EXPIRED
+		} else if c.IsSet("pending") {
+			status = db.STATUS_PENDING
+		}
+		collection.List(status)
+		if !c.IsSet("all") && c.Int("before") > 0 {
+			collection.FilterRecent(c.Int("before"), status)
 		}
 
 		if len(collection.Todos) > 0 {
 			for _, todo := range collection.Todos {
-				todo.MakeOutput(c.Bool("color"))
+				todo.MakeOutput(c.Bool("color"), c.Bool("nerd"))
 			}
 		} else {
 			Write(c, MT_INFO, "There is no todo to show.")
@@ -189,7 +190,7 @@ func TdModify(c *cli.Context) error {
 	}
 
 	Write(c, MT_UPDATE, args.Get(0), " has been updated:")
-	Td.MakeOutput(c.Bool("color"))
+	Td.MakeOutput(c.Bool("color"), c.Bool("nerd"))
 	return nil
 }
 
@@ -265,14 +266,7 @@ func TdReorder(c *cli.Context) error {
 		Write(c, MT_ERROR, err.Error())
 		return err
 	}
-
-	if c.Args().Len() != 0 {
-		Write(c, MT_ERROR, "Reorder takes no arguments.")
-		return argError
-	}
-
-	collection.Reorder()
-	err = db.Save(collection)
+	err = db.Save(collection.Reorder())
 	if err != nil {
 		Write(c, MT_ERROR, err.Error())
 		return err
@@ -345,36 +339,10 @@ func TdSearch(c *cli.Context) error {
 
 	if len(collection.Todos) > 0 {
 		for _, todo := range collection.Todos {
-			todo.MakeOutput(c.Bool("color"))
+			todo.MakeOutput(c.Bool("color"), c.Bool("nerd"))
 		}
 	} else {
 		Write(c, MT_INFO, "There's no todo to show.")
-	}
-	return nil
-}
-
-// Search for todos that have upcoming deadlines
-func TdSearchByDate(c *cli.Context) error {
-	var date time.Time
-	if c.Args().Len() < 2 {
-		date = time.Now().Add(time.Hour * 24)
-	} else {
-		var err error
-		date, err = parser.ParseDate(c.Args().Get(1))
-		if err != nil {
-			Write(c, MT_ERROR, err.Error())
-			return argError
-		}
-	}
-	collection, err := db.Read()
-	if err != nil {
-		Write(c, MT_ERROR, err.Error())
-		return err
-	}
-	for _, v := range collection.Todos {
-		if !v.Deadline.IsZero() && v.Deadline.Before(date) {
-			v.MakeOutput(c.Bool("color"))
-		}
 	}
 	return nil
 }

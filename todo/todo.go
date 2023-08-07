@@ -24,16 +24,20 @@ type Todo struct {
 }
 
 // Prints the todo to screen
-func (t *Todo) MakeOutput(useColor bool) {
+func (t *Todo) MakeOutput(useColor bool, isNerd bool) {
 	var symbole string
 	var color ct.Color
 
 	if t.Status == "done" {
 		color = ct.Green
-		symbole = printer.OkSign
+		symbole = printer.Sign(printer.DONE, isNerd)
 	} else {
 		color = ct.Red
-		symbole = printer.KoSign
+		if t.IsExpired() {
+			symbole = printer.Sign(printer.EXPIRED, isNerd)
+		} else {
+			symbole = printer.Sign(printer.PENDING, isNerd)
+		}
 	}
 
 	hashtagReg := regexp.MustCompile(`#[^\\s]*`)
@@ -63,14 +67,17 @@ func (t *Todo) MakeOutput(useColor bool) {
 	if !t.Deadline.IsZero() {
 		if (t.Deadline.Minute() == 59 && t.Deadline.Hour() == 23) ||
 			(t.Deadline.Minute() == 0 && t.Deadline.Hour() == 0) {
-			fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan"))
+			fmt.Print(printer.Sign(printer.DEADLINE, isNerd), t.Deadline.Format("Mon, 02 Jan"))
 		} else {
-
-			fmt.Print(printer.DeadlineSign, t.Deadline.Format("Mon, 02 Jan 15:04"))
+			fmt.Print(printer.Sign(printer.DEADLINE, isNerd), t.Deadline.Format("Mon, 02 Jan 15:04"))
 		}
 	}
 	if t.Period != 0 {
-		fmt.Print(printer.PeriodSign, t.Period)
+		fmt.Print(printer.Sign(printer.PERIOD, isNerd), t.Period)
 	}
 	fmt.Println(" ")
+}
+
+func (t *Todo) IsExpired() bool {
+	return !t.Deadline.IsZero() && t.Deadline.Before(time.Now())
 }

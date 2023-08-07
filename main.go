@@ -24,26 +24,35 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		&cli.BoolFlag{
-			Name:  "past",
-			Usage: "print todos that are past due",
+			Name:  "expired",
+			Usage: "list tasks that haven't been completed in time",
 		},
 		&cli.BoolFlag{
 			Name:  "done",
-			Usage: "print done todos",
+			Usage: "list only completed tasks",
+		},
+		&cli.BoolFlag{
+			Name:  "pending",
+			Usage: "list only pending tasks",
 		},
 		&cli.BoolFlag{
 			Name:  "all",
-			Usage: "print all todos",
+			Usage: "list all tasks",
 		},
-		&cli.BoolFlag{
-			Name:  "recent",
-			Usage: "print recent todos, can be combined with the rest of options\nExample: td --past --recent=false",
-			Value: true,
+		&cli.IntFlag{
+			Name:  "before",
+			Usage: "print tasks within the amount of days",
+			Value: 14,
 		},
 		&cli.BoolFlag{
 			Name:  "color",
 			Usage: "print with color",
 			Value: true,
+		},
+		&cli.BoolFlag{
+			Name:  "nerd",
+			Usage: "enable nerd fonts, disabled at Windows Builds",
+			Value: false,
 		},
 	}
 	app.Action = cmd.TdList
@@ -51,7 +60,7 @@ func main() {
 		{
 			Name:    "init",
 			Aliases: []string{"i"},
-			Usage:   "Initialize a collection of todos",
+			Usage:   "Initialize a collection of tasks",
 			Action:  cmd.TdInit,
 		},
 		{
@@ -87,20 +96,14 @@ func main() {
 		{
 			Name:    "swap",
 			Aliases: []string{"s"},
-			Usage:   "swap the position of two todos",
+			Usage:   "swap the position of two tasks",
 			Action:  cmd.TdSwap,
 		},
 		{
 			Name:    "search",
 			Aliases: []string{"S"},
-			Usage:   "Search a string in all todos",
+			Usage:   "Search a string in all tasks",
 			Action:  cmd.TdSearch,
-		},
-		{
-			Name:    "filter",
-			Aliases: []string{"f"},
-			Usage:   "Search for todos that have upcoming deadlines",
-			Action:  cmd.TdSearchByDate,
 		},
 	}
 

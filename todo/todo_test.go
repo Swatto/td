@@ -9,6 +9,6 @@ func ExampleTodo() {
 		Status:   "pending",
 		Modified: time.Time{},
 	}
-	todo.MakeOutput(false)
+	todo.MakeOutput(false, false)
 	// Output: 00 | ✕ Test td
 }
