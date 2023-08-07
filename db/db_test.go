@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ func TestGetDbPath(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	path := getDBPath()
+	path := GetDBPath()
 	fmt.Println(path)
 	err = _DeleteFakeDb()
 	if err != nil {
